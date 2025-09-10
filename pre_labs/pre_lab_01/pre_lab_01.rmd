@@ -178,7 +178,7 @@ umd_courses |>
 
 Compared to the previous codeblock, how did the output change and what in the code changed it?
 
-**Answer** The output now has two variables, as opposed to one because we grouped by term and department. Go to umd courses, and then, group by term and department, and then summarise/count the number of classes per term, itemized by department, and then, arrange them by those variables. 
+**Answer** The output now has two variables, as opposed to one because we grouped by term and department. Go to umd courses, and then, group by term and department, and then summarise/count the number of classes per term, itemized by department, and then, arrange term and department in ascending order
 
 ### Task 12: Other summary functions
 
