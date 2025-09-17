@@ -69,7 +69,7 @@ umd_courses |>
 umd_courses |>
   group_by (department, instructors) |>
   summarise(
-    count_course = n(), .groups = "drop"
+    count_course = n(),
   )|>
   arrange(desc(count_course))
 ```
