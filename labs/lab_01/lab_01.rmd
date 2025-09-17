@@ -39,7 +39,7 @@ umd_courses <- read_rds("lab_01.rds")
 
 ## Answer questions
 
-**Q1** Which department has the highest mean (average) number of seats for its classes? You need to show the department with the highest average first. Which one is the most surprising/interesting to you? **A1**
+**Q1** Which department has the highest mean (average) number of seats for its classes? You need to show the department with the highest average first. Which one is the most surprising/interesting to you? **A1** Computer, Math, and Natural Sciences having the highest mean seats, along with the other first four departments, is interesting but not surprising because it is what UMD pushes as its perception. 
 
 ```{r}
 umd_courses |>
