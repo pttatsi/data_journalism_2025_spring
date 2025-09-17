@@ -63,7 +63,7 @@ umd_courses |>
 ```
 
 **Q3** Count the number of courses for each instructor and department. Which instructor has taught the most?
-**A3** Instructor: NA shows up the most, but the instructor who has taught the most classes is Jason Kuo 
+**A3** Instructor: NA shows up the most, but the instructor who has taught the most classes is Keith Yearwood
 
 ```{r}
 umd_courses |>
