@@ -21,7 +21,7 @@ Consider this a personal guide to the commands and functions you will learn. In 
 
 ### How to set the working directory
 
-The command to set a working directory is setwd(). For example, this sets the working directory to a directory called data_journalism_2024_fall inside a directory called jour472 located inside your home directory (the ~ is equivalent of /Users/[youruser] on a Mac).
+The command to set a working directory is setwd(). For example, this sets the working directory to a directory called data_journalism_2024_fall inside a directory called jour472 located inside your home directory (the \~ is equivalent of /Users/[youruser] on a Mac).
 
 ```{r}
 setwd("~/jour472/data_journalism_2024_fall")
@@ -32,4 +32,58 @@ setwd("~/jour472/data_journalism_2024_fall")
 ```{r}
 install.packages("tidyverse")
 library(tidyverse)
+
 ```
+
+```{r}
+filter()
+```
+
+\*\* creates a new data set with the filtered information/rows
+
+```{r}
+select()
+```
+
+\*\*creates a data set for only the selected columns
+
+```{r}
+#umd_courses |>
+  filter(str_detect(title, "Shakespeare"))
+```
+
+# Creating Data Frame
+
+NOTE: `readr` anticipates some date formatting and can automatically handle many of these issues (indeed it uses lubridate under the hood). When you are importing a CSV file, be sure to use `read_csv`, not `read.csv`.
+
+```{r}
+maryland_expenses <- read_csv("data/maryland_expenses.csv")
+
+head(maryland_expenses)
+```
+
+-   head() shows only first 6 columns
+
+# Filters
+
+\*\* When it comes to filters, OR; `|` is additive; it adds more possibilities to the search criteria
+
+AND; `&` is restrictive; it imposes more conditions, limiting the results to only those that meet all criteria.
+
+str_detect --\> string detect (reads text) \*used inside filter and give it a column (title) to search and what you are looking for (shakespeare)
+
+str_like: uses the wildcard search operator % to do partial matching for words
+
+# Dates
+
+Lubricate --\> a tidyverse library created to deal with dates [YYYY-MM-DD]
+
+-   floor date: used to add up the total amount spent in each month in our Maryland expenses data, for example.
+
+```{r}
+#maryland_expenses <- maryland_expenses |> mutate(expenditure_date=mdy(expenditure_date))
+
+#head(maryland_expenses)
+```
+
+summarise(total_amount= sum(amount)): sums up 
