@@ -95,3 +95,24 @@ summarise(total_amount= sum(amount)): sums up
 every group_by takes the argument of the column
 
 count= N() --\> counts the amount of cells in
+
+IQR
+```{r}
+wh_salaries_clean |>
+  summarise(
+    Q1 = quantile(salary, 0.25, na.rm = TRUE),
+    Q3 = quantile(salary, 0.75, na.rm = TRUE),
+    IQR = IQR(salary, na.rm = TRUE)
+  ) |>
+  mutate(
+    lower_bound = Q1 - 1.5 * IQR,
+    upper_bound = Q3 + 1.5 * IQR
+  )
+```
+Then filter salaries outside that range:
+
+```{r}
+wh_salaries_clean |>
+  filter(salary < lower_bound | salary > upper_bound)
+```
+
