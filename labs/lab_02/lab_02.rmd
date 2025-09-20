@@ -74,7 +74,7 @@ fall_2024_courses <- umd_courses |>
   group_by(department) |>
   summarise(
     num_courses_depart = n(),
-    syllabi_posted = sum(syllabus_count >= 1, na.rm = TRUE),  .groups = "drop"
+    syllabi_posted = sum(syllabus_count >= 1, na.rm = TRUE), 
   )|>
    filter(syllabi_posted >= 1) |>  
 arrange(desc(num_courses_depart), desc(syllabi_posted))
