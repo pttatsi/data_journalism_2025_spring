@@ -141,6 +141,20 @@ spending_summary
 
 **Q6.** Choose your own adventure: using either the UMD courses or campaign expenses data, ask and answer a question that is different than the previous ones. You can use one of the ones you provided in the pre_lab. **A6.**
 
-```{r}
+Q6: identify the different types of expense methods and how many times cash was used 
 
+```{r}
+maryland_expenses |>
+  group_by(expense_method)|>
+ summarise(
+    times_used= n()
+ ) |>
+arrange(desc(times_used))
+```
+Filter for when the expense method is NA. (I used AI for this, my prompt was "i want to create an internal table with expense methods marked NA" with the code I'd written that wasn't working. What was missing was "is.na," which tells R to filter anything in expense_method that is labled NA)
+
+```{r}
+maryland_expenses |>
+  group_by(expense_method) |>
+  filter(is.na(expense_method)) 
 ```
