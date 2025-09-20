@@ -23,6 +23,8 @@ Consider this a personal guide to the commands and functions you will learn. In 
 
 The command to set a working directory is setwd(). For example, this sets the working directory to a directory called data_journalism_2024_fall inside a directory called jour472 located inside your home directory (the \~ is equivalent of /Users/[youruser] on a Mac).
 
+IMPORTANT or you WILL go insane: - remember quotations "" '' around variables
+
 ```{r}
 setwd("~/jour472/data_journalism_2024_fall")
 ```
@@ -86,4 +88,10 @@ Lubricate --\> a tidyverse library created to deal with dates [YYYY-MM-DD]
 #head(maryland_expenses)
 ```
 
-summarise(total_amount= sum(amount)): sums up 
+summarise(total_amount= sum(amount)): sums up
+
+\`str_to_upper --\> a mix of styles: lower-case and upper-case names like "Anedot" and "ANEDOT", R will think are different
+
+every group_by takes the argument of the column
+
+count= N() --\> counts the amount of cells in

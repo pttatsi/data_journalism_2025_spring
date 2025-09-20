@@ -39,7 +39,6 @@ umd_courses <- read_rds("data/umd_courses.rds")
 ```{r}
 journalism_courses <- umd_courses |> 
 filter(department == "Journalism")
-
 journalism_courses |>
 arrange(desc(seats)) |>
   head()
@@ -54,9 +53,6 @@ head(selected_journalism_courses)
 ```{r}
 research_linguistics <- umd_courses |>
   filter(department == "Linguistics") 
-
-selected_research_linguistics <- research_linguistics |> 
-  select("Michelle Morrison")
 ```
 
 \*\*
