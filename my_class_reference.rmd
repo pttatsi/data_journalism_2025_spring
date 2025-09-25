@@ -64,7 +64,7 @@ maryland_expenses <- read_csv("data/maryland_expenses.csv")
 head(maryland_expenses)
 ```
 
--   head() shows only first 6 columns
+# head() shows only first 6 columns
 
 # Filters
 
@@ -72,15 +72,13 @@ head(maryland_expenses)
 
 AND; `&` is restrictive; it imposes more conditions, limiting the results to only those that meet all criteria.
 
-str_detect --\> string detect (reads text) \*used inside filter and give it a column (title) to search and what you are looking for (shakespeare)
+# str_detect --> string detect (reads text) \*used inside filter and give it a column (title) to search and what you are looking for (shakespeare)
 
-str_like: uses the wildcard search operator % to do partial matching for words
+# str_like: uses the wildcard search operator % to do partial matching for words
 
-# Dates
+# Lubricate --> a tidyverse library created to deal with dates [YYYY-MM-DD]
 
-Lubricate --\> a tidyverse library created to deal with dates [YYYY-MM-DD]
-
--   floor date: used to add up the total amount spent in each month in our Maryland expenses data, for example.
+# floor date: used to add up the total amount spent in each month in our Maryland expenses data, for example.
 
 ```{r}
 #maryland_expenses <- maryland_expenses |> mutate(expenditure_date=mdy(expenditure_date))
@@ -115,4 +113,29 @@ Then filter salaries outside that range:
 wh_salaries_clean |>
   filter(salary < lower_bound | salary > upper_bound)
 ```
+
+```{r}
+#Filter to Wes Moore's committee
+wes_moore_expenses <- maryland_expenses_dates |>
+filter(str_detect(committee_name, "Moore Wes For Maryland"))
+
+#Summarise total spending by month
+monthly_spending <- wes_moore_expenses |>
+  group_by(month) |>
+  summarise(total_amount = sum(amount, na.rm = TRUE))
+
+head(monthly_spending)
+```
+
+# case_when
+```{r}
+case_when( 
+        str_detect(address, "Maryland") ~ "In-State",
+        TRUE ~ "Out of state"
+      )
+```
+
+Use for case_when: find states: 
+## state.name --> place in console
+## state.abb --> place in console
 

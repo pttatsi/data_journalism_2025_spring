@@ -98,6 +98,8 @@ head(maryland_expenses)
 maryland_expenses <- maryland_expenses |>
 mutate(expenditure_date = mdy(expenditure_date)) 
 ```
+
+
 ```{r}
 maryland_expenses |>
 mutate(month = floor_date(expenditure_date, "month")) |>
