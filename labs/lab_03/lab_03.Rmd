@@ -57,11 +57,13 @@ HINT: you should use filter() just once, and inside your filter you want to look
 
 When you have found as many as possible, save the result to a new dataframe called `pg_schools`. How many records did you find?
 
-A1:
+A1: I found 1,190 rows with Prince George in the Vendor name 
 
 ```{r}
 pg_schools <- cleaned_payments |>
-filter(str_detect(vendor_name,"Prince Georges"))
+filter(str_detect(vendor_name,"PRINCE GEORGE"))
+
+pg_schools
 ```
 
 Q2: Using that `pg_schools` dataframe, write code to calculate the total amount of payments to the Prince George's County School system for each fiscal year. Which fiscal year had the largest total amount? Are there any aspects of the results that stand out to you?
@@ -69,6 +71,12 @@ Q2: Using that `pg_schools` dataframe, write code to calculate the total amount 
 A2:
 
 ```{r}
+pg_schools |>
+select(fiscal_year, amount) |>
+ summarise(
+    amount=n()
+  ) |>
+arrange(desc(amount))
 ```
 
 Q3. You're interested in examining the vendors paid for capital projects at the University of Maryland. Search the payments data to find those payments, then write code to produce a list of each vendor and the total amount it received.
