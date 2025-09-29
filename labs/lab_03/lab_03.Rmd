@@ -34,8 +34,9 @@ payments <- read_csv("data/State_of_Maryland_Payments_Data__FY2008_to_FY2024.csv
 
 ```{r}
 cleaned_payments <- payments |>
-  clean_names()
-
+  clean_names() |>
+mutate(agency_name = str_to_upper(agency_name ), vendor_name = str_to_upper(vendor_name), category = str_to_upper(category)) |>
+glimpse()
 ```
 
 
@@ -46,8 +47,11 @@ md_grants_loans <- read_csv("data/State_of_Maryland_Grant_and_Loan_Data__FY2009_
 ```
 ```{r}
 cleaned_md_grants_loans <- md_grants_loans |>
-  clean_names()
+  clean_names() |>
+ mutate(grantor = str_to_upper(grantor), grantee = str_to_upper(grantee), description = str_to_upper(description)) |>
+ mutate(zip5 = str_sub(zip_code, start=1L, end=5L))
 ```
+
 
 ## Answer questions
 
@@ -68,15 +72,13 @@ pg_schools
 
 Q2: Using that `pg_schools` dataframe, write code to calculate the total amount of payments to the Prince George's County School system for each fiscal year. Which fiscal year had the largest total amount? Are there any aspects of the results that stand out to you?
 
-A2:
+A2: 
 
 ```{r}
 pg_schools |>
-select(fiscal_year, amount) |>
- summarise(
-    amount=n()
-  ) |>
-arrange(desc(amount))
+group_by(fiscal_year)|>
+summarise(yearly_amount = sum(amount, na.rm = TRUE)) |>
+arrange(desc(fiscal_year))
 ```
 
 Q3. You're interested in examining the vendors paid for capital projects at the University of Maryland. Search the payments data to find those payments, then write code to produce a list of each vendor and the total amount it received.
@@ -86,18 +88,43 @@ Look carefully at that list - what cleaning will it require to ensure that you h
 A3.
 
 ```{r}
+pg_schools |>
+filter(str_detect(agency_name, "CAPITAL")) 
 ```
 
 Q4: You want to understand how much state grant money went to stem cell research projects each fiscal year. Search the data to find grants that fit that description. Once you find which column(s) contain the information you want, your code should find just the grants for stem cell research in a single filter. Then calculate the total amount of money for each fiscal year. Write a sentence summarizing how stem cell research funding has changed over time.
 
-A4:
+A4: In 2010, the state of Maryland granted a total of 7,870,123 in money to stem cell research, a 6,773,598 decrease from the previous year when they donated 14,643,721. For the next 10 years, funding ebbed between 6 to 8 million with multiple outleirs that drag the data distribution in positive and negative ways. 
 
 ```{r}
+stem_cell_total <- cleaned_md_grants_loans |>
+select(grantor, amount, description, fiscal_year) |>
+filter(str_detect(description,"STEM CELL RESEARCH GRANT"))
+```
+
+```{r}
+stem_cell_total |>
+group_by(fiscal_year)|>
+summarise(yearly_amount = sum(amount, na.rm = TRUE)) |>
+arrange(desc(fiscal_year)) 
 ```
 
 Q5: Using the Maryland grants and loan data, find records where the zip code is the one where the University of Maryland-College Park is located in and produce a list of grantees from that zip code, along with the total amount they received. Write a paragraph explaining how many grantees are there, what you would need to do to clean the results so that you had one record per grantee and which grantees are most interesting to you?
 
-A5:
+A5: There are 62 grantees located at UMD's zip codes, the highest is the University of Maryland's E-NNOVATION INITIATIVE PROGRAM AND FUND, which was granted 4,156,250.00. The lowest amounts were loans from the state granted to small businesses such as Terrapin Care Center as relief during the pandemic. They all equal 5,000. I would need to use the get_dupes() function to find possible duplicates, then use distinct () to merge any that are exactly the same to have one record per grantee. The most interesting grantees to me are the state's funds to education, especially towards disabled and young people because it is a good investment into the community and trends related to marginalized groups can signal the priorities or values of a government (especially if in a specific time period). There's also grant money being given as initiative for data centers, a hot topic in pg county because of the environmental risks it poses to the surrounding community. 
 
 ```{r}
+umd_state_grants <- cleaned_md_grants_loans |>
+filter(str_detect(zip5,"20742|20740")) |>
+select(grantee, zip5, amount, fiscal_year, description, category) |>
+arrange(desc(fiscal_year)) 
 ```
+
+
+```{r}
+umd_state_grants |>
+group_by(grantee, description, category)|>
+summarise(total_amount = sum(amount, na.rm = TRUE)) |>
+arrange(desc(total_amount)) 
+```
+
