@@ -29,7 +29,7 @@ options(scipen=999)
 library(tidyverse)
 library(janitor)
 library(lubridate)
-
+library(stringr)
 ```
 
 For this lab, we want to investigate spending by Maryland state and local candidates during the 2022 election. For example, we could ask how much money have candidates and committees spent on advertising on Facebook? Which vendors received the most money for media expenses? We have the data, but it's messy - names of payees are spelled differently and capitalized differently - and we need to clean it up. We'll use a combination of RStudio and OpenRefine to do that.
@@ -50,12 +50,12 @@ maryland_expenses <- read_csv("./data/maryland_expenses.csv")
 ```{r}
 problems(maryland_expenses)
 ```
+
 ```{r}
 library(lubridate)
 library(janitor)
 
 ```
-
 
 ```{r}
 
@@ -75,13 +75,16 @@ cleaned_md_expenses |>
 **Q1.** You've been assigned to write about Maryland political committees' use of Facebook advertising. There's a category column in the data that has values for different kinds of spending. One of them is "Media". You'll need to complete the following steps:
 
 1.  Create a dataframe of Media expenses where the name of the payee is not NA.
+
 2.  Then, using `write_csv`, make a CSV file of your media expenses in your data folder. `write_csv()` is similar to `read_csv()` but you provide it with the dataframe you're writing and the file path.
+
 3.  Using OpenRefine, create a project using that CSV file, create a copy of the `payee_name` column called `payee_clean` and then standardize it, focusing on the payees that appear most often. Pay particular attention to variations of Facebook, bearing in mind that it changed its name in 2021: <https://about.fb.com/news/2021/10/facebook-company-is-now-meta/>), but also clean up variations of the most common payees.
 
 4.  When you are done standardizing `payee_clean`, export it as a new CSV file to your data folder, *giving it a different name* and read it back into RStudio as a new dataframe.
+
 5.  Using that `payee_clean` column in your new dataframe, calculate the total amount of Facebook spending by each committee and present the results showing the committee that spent the most first.
 
-**A1.** 
+**A1.** Friends of Jain Ashwani was the top spender at Facebook. (I filtered more after OpenRefine because I found more variations of Facebook\|Meta when I parsed the data).
 
 ```{r}
 media_expenses <- cleaned_md_expenses |>
@@ -94,10 +97,13 @@ write_csv("./data/media_expenses.csv")
 ```{r}
 clean_media_expenses <- read_csv("./data/media-x2.csv")
 ```
+
+```{r}
+nrow(clean_media_expenses)
+```
+
 ```{r}
 clean_media_expenses <- clean_media_expenses |>
-filter(str_detect(payee_clean, "Facebook")) |>
-filter(str_detect(payee_clean, "Meta")) |>
 mutate(
     payee_clean = case_when(
         str_detect(payee_clean, "Facebook Corporate") ~ "Meta",
@@ -106,35 +112,64 @@ mutate(
         str_detect(payee_clean, "Facebook.com") ~ "Meta",
         str_detect(payee_clean, "Facebook Campaign") ~ "Meta",
         str_detect(payee_clean, "Metaplatforms for Facebook") ~ "Meta",
-        str_detect(payee_clean, "Meta For Business Facebook") ~ "Meta"))
-        
+        str_detect(payee_clean, "Meta Platforms") ~ "Meta",
+        str_detect(payee_clean, "Meta For Business Facebook") ~ "Meta", 
+         TRUE ~ payee_clean))
 ```
-
 
 ```{r}
-payee_clean<-clean_media_expenses|>
-  select(payee_clean)
+meta_expenditure <- clean_media_expenses |>
+filter(str_detect(payee_clean, "Meta")) |>
+  group_by(committee_name) |>
+  summarise(total_amount = sum(amount)) |>
+  arrange(desc(total_amount)) 
+
+meta_expenditure
 ```
 
+**Q2.** Let's do some research on the top committees from question 1. Look up the top 10 spenders: if they are candidate committees, what offices were they running for? If they were not candidates, what issues do they seem to care about? Write some sentences answering those questions, then go the Facebook ad library
 
-**Q2.** Let's do some research on the top committees from question 1. Look up the top 10 spenders: if they are candidate committees, what offices were they running for? If they were not candidates, what issues do they seem to care about? Write some sentences answering those questions, then go the Facebook ad library ([https://www.facebook.com/ads/library/?active_status=all&ad_type=political_and_issue_ads&country=US&sort_data\\[direction\\]=desc&sort_data\\[mode\\]=relevancy_monthly_grouped&media_type=all](https://www.facebook.com/ads/library/?active_status=all&ad_type=political_and_issue_ads&country=US&sort_data%5Bdirection%5D=desc&sort_data%5Bmode%5D=relevancy_monthly_grouped&media_type=all){.uri}) and look for ads from the top spender. What do you notice about the the information provided about those ads?
+([https://www.facebook.com/ads/library/?active_status=all&ad_type=political_and_issue_ads&country=US&sort_data\\[direction\\]=desc&sort_data\\[mode\\]=relevancy_monthly_grouped&media_type=all](https://www.facebook.com/ads/library/?active_status=all&ad_type=political_and_issue_ads&country=US&sort_data%5Bdirection%5D=desc&sort_data%5Bmode%5D=relevancy_monthly_grouped&media_type=all){.uri}) and look for ads from the top spender. What do you notice about the the information provided about those ads?
 
-**A2.**
+**A2.** Candidate committees are Friends of Jain Ashwani (Maryland house seat, democratic, called for a Ceasefire in the Middle East, accessible education and healthcare), Friends of Peter Franchot Franchot Anderson-Walker for Maryland Slate (ran for Governor as democrat, cared about diversity and inclusion), Friends of Billy Boniface (conservative values/concerned with improving small businesses), Friends of Jasani Salimah (ran for at-large seat of BCPS, cares about community, eductation, crafts), Baron Jon (Jonathan) for Maryland (democratic candidate for governor in 2022), King and Siri for Maryland Slate (democratic candidates for governor in 2022), and Friends of Shuman Eve (ran for PG council in 2022, working class values). The rest are political action committees, such as World Food Programme and Casa in Action, that are focused on working with and advocating for the community, and part of that can be endorsing candidates they feel align with that goal.
 
 **Q3.** Given the list of top spenders in A1 and the primary results for governor (<https://elections.maryland.gov/elections/2022/primary_results/gen_results_2022_1.html>), who is missing from that Q1 list? Did those campaigns run Facebook ads? Who are the biggest recipients of media expenses by the Democratic primary winner for governor (HINT: that person has two committees, the second one with his running mate)?
 
-**A3.**
+**A3.** Wes Moore is missing from the Q1 list, however, further inspection shows that the Casa in Action PAC had media expenses towards support for Wes(tlet) Moore. Moore spent most of his media dollar on SKDK, a political consulting firm. 
 
 ```{r}
+Moore_expenses <- clean_media_expenses |>
+filter(str_detect(committee_name, "Moore  Wes For Maryland|Moore Miller For Maryland Slate"))
 ```
+
+```{r}
+Moore_expenses |>
+group_by(payee_clean) |>
+summarise(total_amount = sum(amount)) |>
+arrange(desc(total_amount))
+```
+```{r}
+Casa_for_moore <- clean_media_expenses |>
+filter(str_detect(expense_toward, "WESTLEY MOORE - SUPPORT")) |>
+filter(str_detect(committee_name, "Casa in Action PAC")) |>
+filter(payee_clean == "Meta") |>
+  summarise(total_amount_ad_spend = sum(amount)) |>
+arrange(desc(total_amount_ad_spend))
+```
+
 
 **Q4.** The media expense data you cleaned also has a standardized purpose column. Write code to generate a list of the committees with the total amount of spending on online advertising. How does this list compare to the one from Q1 about top Facebook spenders? Of the top 5 committees who spent the most on Facebook ads from Q1, are there any that appear to have spent *all* of their online advertising dollars on Facebook?
 
-**A4.**
+**A4.** Out of the top five spenders, Friends of Jain Ashwani and Franchot Anderson-Walker for Maryland Slate spent all their online advertising dollars on Facebook. This list broadens our perspective of how much money goes into online advertising for political campaigns. The first list shows us the worth of Meta in the campaign world and the second list shows us the full worth of the market in one state for...one race.
 
 ```{r}
+online_spend_committee <- media_expenses |>
+filter(expense_purpose == "Online Advertising") |>
+group_by(committee_name) |>
+summarise(total_amount_ad_spend = sum(amount)) |>
+arrange(desc(total_amount_ad_spend))
 ```
 
 **Q5** Your editor asks you to summarize your findings about spending on Facebook by Maryland political candidates. How much do we know and what don't we know? What's the best story idea you've found here?
 
-**A5**
+**A5** Maryland political candidates rely heavily on Facebook to get their message out to voters. Even candidates like Wes Moore who did not outwardly spend his online advertising dollars on Facebook, was campaigned on the platform by PACs such as Casa in Action, who spent $5119.29. Other campaigns such as  Franchot and Anderson's and Jain Ashwani spent all their online advertising dollars on Facebook adverts. What we don't know (for sure but can be inferred) is that the voters they're trying to reach the most are older voters who use facebook more often than younger voters. 
