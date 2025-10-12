@@ -44,7 +44,30 @@ You'll need to load one data set, a CSV file of Maryland campaign expenditures l
 
 ```{r}
 # Load the Maryland expenditures data table
-maryland_expenses <- read_csv("C:/iCloud Drive/Documents/GitHub/data_journalism_2025_spring/labs/lab_04/datamaryland_expenses.csv")
+maryland_expenses <- read_csv("./data/maryland_expenses.csv")
+```
+
+```{r}
+problems(maryland_expenses)
+```
+```{r}
+library(lubridate)
+library(janitor)
+
+```
+
+
+```{r}
+
+cleaned_md_expenses <- maryland_expenses |>
+  clean_names()
+
+cleaned_md_expenses
+```
+
+```{r}
+cleaned_md_expenses |>
+  mutate(expenditure_date=mdy(expenditure_date))
 ```
 
 ## Answer questions
@@ -54,13 +77,45 @@ maryland_expenses <- read_csv("C:/iCloud Drive/Documents/GitHub/data_journalism_
 1.  Create a dataframe of Media expenses where the name of the payee is not NA.
 2.  Then, using `write_csv`, make a CSV file of your media expenses in your data folder. `write_csv()` is similar to `read_csv()` but you provide it with the dataframe you're writing and the file path.
 3.  Using OpenRefine, create a project using that CSV file, create a copy of the `payee_name` column called `payee_clean` and then standardize it, focusing on the payees that appear most often. Pay particular attention to variations of Facebook, bearing in mind that it changed its name in 2021: <https://about.fb.com/news/2021/10/facebook-company-is-now-meta/>), but also clean up variations of the most common payees.
+
 4.  When you are done standardizing `payee_clean`, export it as a new CSV file to your data folder, *giving it a different name* and read it back into RStudio as a new dataframe.
 5.  Using that `payee_clean` column in your new dataframe, calculate the total amount of Facebook spending by each committee and present the results showing the committee that spent the most first.
 
-**A1.**
+**A1.** 
 
 ```{r}
+media_expenses <- cleaned_md_expenses |>
+filter(expense_category == "Media") |>
+filter(!is.na(payee_name)) |>
+  
+write_csv("./data/media_expenses.csv")
 ```
+
+```{r}
+clean_media_expenses <- read_csv("./data/media-x2.csv")
+```
+```{r}
+clean_media_expenses <- clean_media_expenses |>
+filter(str_detect(payee_clean, "Facebook")) |>
+filter(str_detect(payee_clean, "Meta")) |>
+mutate(
+    payee_clean = case_when(
+        str_detect(payee_clean, "Facebook Corporate") ~ "Meta",
+        str_detect(payee_clean, "FACEBOOK PAYMENTS INC") ~ "Meta",
+        str_detect(payee_clean, "Facebook/Meta") ~ "Meta",
+        str_detect(payee_clean, "Facebook.com") ~ "Meta",
+        str_detect(payee_clean, "Facebook Campaign") ~ "Meta",
+        str_detect(payee_clean, "Metaplatforms for Facebook") ~ "Meta",
+        str_detect(payee_clean, "Meta For Business Facebook") ~ "Meta"))
+        
+```
+
+
+```{r}
+payee_clean<-clean_media_expenses|>
+  select(payee_clean)
+```
+
 
 **Q2.** Let's do some research on the top committees from question 1. Look up the top 10 spenders: if they are candidate committees, what offices were they running for? If they were not candidates, what issues do they seem to care about? Write some sentences answering those questions, then go the Facebook ad library ([https://www.facebook.com/ads/library/?active_status=all&ad_type=political_and_issue_ads&country=US&sort_data\\[direction\\]=desc&sort_data\\[mode\\]=relevancy_monthly_grouped&media_type=all](https://www.facebook.com/ads/library/?active_status=all&ad_type=political_and_issue_ads&country=US&sort_data%5Bdirection%5D=desc&sort_data%5Bmode%5D=relevancy_monthly_grouped&media_type=all){.uri}) and look for ads from the top spender. What do you notice about the the information provided about those ads?
 

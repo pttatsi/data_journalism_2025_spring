@@ -65,7 +65,7 @@ A1: I found 1,190 rows with Prince George in the Vendor name
 
 ```{r}
 pg_schools <- cleaned_payments |>
-filter(str_detect(vendor_name,"PRINCE GEORGE"))
+  filter(str_detect(vendor_name, "PRINCE GEORGE|PRINCE GEORGE'S|PRINCE GEORGE'S COUNTY|PRINCE GEORGES"))
 
 pg_schools
 ```

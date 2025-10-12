@@ -70,7 +70,9 @@ md_grant_loans |>
 
 ### Task 5: Use refinr to clean the grantee_clean field.
 
-**Task** Run the following code to make a copy of the Grantee field called grantee_clean, then use the `key_collision_merge` function from refinr to attempt to standardize similar values. Store it as a new object called cleaned_md_grant_loans Click the black arrow on the table to examine the Grantee and grantee_clean columns. Looking at the results on the first 3 pages only (first 30 rows), name two changes the refinr package made, by comparing Grantee to grantee_clean. **Answer** Honestly, I cannot see much difference in the columns from the code I ran. I didn't change anything and cross-referenced with the online textbook. A chnage i observed is that some entries like Melwood Horticultural Training Center, Inc. changed to Melwood Horticultural Training Center, but that's not the same with Take Charge Juvenile Diversion Program, Inc. where "Inc." remains across both columns. 
+**Task** Run the following code to make a copy of the Grantee field called grantee_clean, then use the `key_collision_merge` function from refinr to attempt to standardize similar values. Store it as a new object called cleaned_md_grant_loans Click the black arrow on the table to examine the Grantee and grantee_clean columns. Looking at the results on the first 3 pages only (first 30 rows), name two changes the refinr package made, by comparing Grantee to grantee_clean. 
+
+**Answer** Honestly, I cannot see much difference in the columns from the code I ran. I didn't change anything and cross-referenced with the online textbook. A chnage i observed is that some entries like Melwood Horticultural Training Center, Inc. changed to Melwood Horticultural Training Center, but that's not the same with Take Charge Juvenile Diversion Program, Inc. where "Inc." remains across both columns. 
 
 ```{r}
 cleaned_md_grant_loans <- md_grant_loans |>
@@ -97,23 +99,25 @@ cleaned_md_grant_loans |>
 
 ### Task 7: Use a different refinr method to clean the city_clean field.
 
-**Task** Run the following code to use the n_gram_merge() function to clean the data, then group by grantee_clean and Grantee to examine recipients that start with W. Look at the differences. Does the changes it made vary substantially from the previous use of key_collision_merge? **Answer** No it does not vary sustainably, I am not sure what the change is. The little changes I see don't make sense to me like one entry being made lower case from all upper case. 
+**Task** Run the following code to use the n_gram_merge() function to clean the data, then group by grantee_clean and Grantee to examine recipients that start with W. Look at the differences. Does the changes it made vary substantially from the previous use of key_collision_merge?
+
+**Answer** No it does not vary sustainably, I am not sure what the change is. The little changes I see don't make sense to me like one entry being made lower case from all upper case. 
 
 ```{r}
 cleaned_md_grant_loans <- md_grant_loans |>
   mutate(grantee_clean=n_gram_merge(Grantee)) |>
-  select(Grantee, grantee_clean, everything())
+  select(Grantee, grantee_clean) #everything())
 
 cleaned_md_grant_loans
 
 
 cleaned_md_grant_loans |>
-  group_by(Grantee, grantee_clean) |>
+  group_by(grantee_clean) |>
   summarise(
     count=n()
   ) |>
-  filter(str_detect(Grantee, '^w|^W')) |>
-  arrange(Grantee)
+  filter(str_detect(grantee_clean, '^w|^W')) |>
+  arrange(desc(count))
 
 ```
 
