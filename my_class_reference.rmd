@@ -139,3 +139,32 @@ Use for case_when: find states:
 ## state.name --> place in console
 ## state.abb --> place in console
 
+
+```{r}
+clean_media_expenses <- clean_media_expenses |>
+filter(str_detect(payee_clean, "Facebook")) |>
+filter(str_detect(payee_clean, "Meta")) |>
+mutate(
+    payee_clean = case_when(
+        str_detect(payee_clean, "Facebook Corporate") ~ "Meta",
+        str_detect(payee_clean, "FACEBOOK PAYMENTS INC") ~ "Meta",
+        str_detect(payee_clean, "Facebook/Meta") ~ "Meta",
+        str_detect(payee_clean, "Facebook.com") ~ "Meta",
+        str_detect(payee_clean, "Facebook Campaign") ~ "Meta",
+        str_detect(payee_clean, "Metaplatforms for Facebook") ~ "Meta",
+        str_detect(payee_clean, "Meta Platforms") ~ "Meta",
+        str_detect(payee_clean, "Meta For Business Facebook") ~ "Meta"))
+        
+```
+
+```{r}
+filter(str_detect(payee_clean, "Facebook|Meta")) |>
+```
+
+```{r}
+clean_media_expenses |>
+   group_by(payee_clean) |>
+  summarise(total_amount = sum(amount)) |>
+  arrange(desc(total_amount))
+```
+
