@@ -57,7 +57,7 @@ Since we have five dataframes, we’re going to need to pass them as a list, mea
 
 ```{r}
 # bind_rows with list
-county_voters_combined <- bind_rows(list(county_voters_2016, county_voters_2018, county_voters_2020, county_voters_2022, county_voters_2024))
+county_voters_combined <- bind_rows(list(county_voters_2016, county_voters_2018, county_voters_2020, county_voters_2022))
 View(county_voters_combined)
 ```
 
@@ -71,7 +71,7 @@ Let’s start by reading in some Maryland 2020 county population data:
 
 ### Task 4: Loading population data
 
-**Task** Load the Maryland 2020 county population data **Answer**
+**Task** Load the Maryland 2020 county population data **Answer** 
 
 ```{r}
 maryland_population <- read_csv('data/maryland_population_2020.csv')
@@ -87,7 +87,7 @@ We can do this join multiple ways and get a similar result. We can put the popul
 
 ### Task 5: Join population and voter data
 
-**Task** Run the following code to join Maryland population data and the 2020 voter registration data together using the common column county as the key. How many rows are there now? How many *should* there be? **Answer**
+**Task** Run the following code to join Maryland population data and the 2020 voter registration data together using the common column county as the key. How many rows are there now? How many *should* there be? **Answer** There should be 24 rows because we are adding columns not rows.
 
 ```{r}
 # with nrow included to show row total
@@ -109,7 +109,7 @@ When the join column is obvious - it's the same name in both dataframes - R will
 
 ### Task 7: Assign Joined Data to New Dataframe
 
-**Task** Create a new dataframe with population and voter data joined together. What does the output message below say about the join? **Answer**
+**Task** Create a new dataframe with population and voter data joined together. What does the output message below say about the join? **Answer** Joining with `by = join_by(COUNTY)`, exact function from previous codeblock
 
 ```{r}
 maryland_population_with_voters <- maryland_population |> left_join(county_voters_2020)
@@ -143,13 +143,17 @@ We can get this by using mutate and arrange:
 
 ### Task 10: Asking Demographic Questions
 
-**Task** Using mutate, let's find the county with the highest 18+ Black population as a percentage of all population 18 and over and also the percentage of Democrats in that county. Put your answers below. **Answer**
+**Task** Using mutate, let's find the county with the highest 18+ Black population as a percentage of all population 18 and over and also the percentage of Democrats in that county. Put your answers below. **Answer** Prince George's county has the highest 18+ Black population as well as highest percentage of Democrats 
 
 ```{r}
 maryland_population_with_voters_and_demographics |>
   mutate(pct_black_18_plus = (pop_black/pop_18_over)*100, pct_dems = (DEM/TOTAL)*100) |> 
   arrange(desc(pct_black_18_plus)) |> 
   select(COUNTY, pct_black_18_plus, pct_dems)
+```
+```{r}
+maryland_population_with_voters_and_demographics |>
+write_csv("./data/maryland_population_with_voters_and_demographics.csv") 
 ```
 
 If you know Maryland political demographics, this result isn’t too surprising, but Somerset County - the state’s 2nd smallest in terms of population - stands out for its Black population, which is a greater percentage than Baltimore County and Montgomery County.
@@ -158,7 +162,9 @@ Let’s change that to look at Asian population:
 
 ### Task 11: Asking Demographic Questions
 
-**Task** Now let's find the county with the highest 18+ Asian population as a percentage of all population 18 and over and also the percentage of Democrats in that county. How do these results compare to the previous task? Put your answers below. **Answer**
+**Task** Now let's find the county with the highest 18+ Asian population as a percentage of all population 18 and over and also the percentage of Democrats in that county. How do these results compare to the previous task? Put your answers below. 
+
+**Answer** Howard county has the highest 18+ Asian population with an average percentage of democrats. It seems the 18+ Asian population of 4.6793263 in Prince George's county is minuscule when compared with the 18+ Black population of 60.9035922. However, the total of Howard count's 18+ Asian and Black population does not account for half of the county's demographic so this indicates there's a big group being over looked. 
 
 ```{r}
 maryland_population_with_voters_and_demographics |>
@@ -171,7 +177,7 @@ maryland_population_with_voters_and_demographics |>
 
 Sometimes joins look like they should work but don't. Often this is due to the two columns you're joining on having different data types: joining a <chr> column to a <dbl> column, for example. Let's walk through an example of that using some demographic data by zip code.
 
-**Task** Run the following code to load the Zip Code Tabulation Area data for Maryland. What's the datatype of the ZCTA5N? column? **Answer**
+**Task** Run the following code to load the Zip Code Tabulation Area data for Maryland. What's the datatype of the ZCTA5N? column? **Answer** It is a double or number column
 
 ```{r}
 maryland_zcta <- read_csv('data/maryland_zcta.csv')
@@ -181,9 +187,12 @@ glimpse(maryland_zcta)
 The column we're interested in, ZCTA5N, is a <dbl> column - it's a number. We want it to be a <chr> column - text - so we can use it in joins.
 
 **Task** Run the following code to change the datatype of ZCTA5N from numeric to character. What's the datatype of ZCTA5N now? **Answer**
+It is now a chr or character column
 
 ```{r}
 maryland_zcta <- maryland_zcta |> mutate(across(ZCTA5N, as.character))
+
+glimpse(maryland_zcta)
 ```
 
 Now we can join this dataframe to other zip code data where the zip code column is text, not numbers.
