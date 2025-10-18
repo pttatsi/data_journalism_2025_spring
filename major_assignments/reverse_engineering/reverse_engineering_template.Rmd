@@ -79,6 +79,13 @@ filter(str_detect(race, "B")) |>
 filter(str_detect(gender, "female")) |>
   filter(str_detect(armed_with, "unarmed"))
 ```
+```{r}
+fatal_race_armed |>
+select(race, gender, armed_with, name) |>
+  filter(
+    gender == "female"
+  ) 
+```
 
 ### Sentence 2
 
