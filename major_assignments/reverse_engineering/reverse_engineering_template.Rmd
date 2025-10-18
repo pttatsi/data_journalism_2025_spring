@@ -42,7 +42,6 @@ fatal_police_shooting <- read_csv("data/fatal-police-shootings.csv")
 fatal_police_shooting_agencies <- read_csv("data/fatal-police-shootings-agencies.csv")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
-
 # Clean required data and prepare for analysis if needed. 
 ```
 
@@ -51,9 +50,11 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: 
+* **Sentence text**: The Post found only one other fatal shooting that closely matched Taylor’s case — a Black woman, unarmed, killed during a raid at home while a boyfriend shot at police. But 139 other cases shared one or more of the circumstances in which Taylor was killed. Of the 247 women fatally shot, 48 were Black and seven of those were unarmed.
 
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+
+When filtered for women, regardless of race, the total of victims fatally shot is 422, nearly double the amount reported by the Post (not sure how to get nearly 250). Of the 422 women shot by the police, 87 were Black and female while nine were Black, female, and unarmed; Breanna Taylor is part of this list. I am unable to verify if these women were at home when they died because 1. their addresses are not included in the data set. Is there a way to generate a change where the longitute and latitude data into locations? Or would we need to look each one up and create a new column for it? 
 
 ```{r}
 fatal_race_armed <- fatal_police_shooting |>
@@ -62,9 +63,21 @@ fatal_race_armed <- fatal_police_shooting |>
 
 ```{r}
 # Put code to reverse engineer sentence here
-
+fatal_race_armed |>
+select(race, gender, armed_with, name) |>
+  filter(
+    race == "B",
+    gender == "female"
+  )
 # Display results of code below this codeblock
 
+```
+```{r}
+fatal_police_shooting |>
+select(race, gender, armed_with, name) |>
+filter(str_detect(race, "B")) |>
+filter(str_detect(gender, "female")) |>
+  filter(str_detect(armed_with, "unarmed"))
 ```
 
 ### Sentence 2
