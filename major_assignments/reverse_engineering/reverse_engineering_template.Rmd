@@ -1,7 +1,7 @@
 ---
 title: "Reverse Engineering Project"
-author: "Student names here"
-date: "Date here"
+author: Princess Tatsi
+date: Oct. 18th 2025
 output:
   html_document:
     theme: cerulean
