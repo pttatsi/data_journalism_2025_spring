@@ -18,14 +18,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction 
 
-In this notebook, we are reverse engineering the story, [STORY NAME](STORY URL)
+In this notebook, we are reverse engineering the story, [Nearly 250 women have been
+fatally shot by police since 2015](https://www.washingtonpost.com/graphics/2020/investigations/police-shootings-women/)
 
 ## Load libraries
 
 Loading required libraries for this analysis.
 
 ```{r echo=FALSE, message=FALSE}
-
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(stringr)
 ```
 
 ## Load and Cleaning Data
@@ -34,12 +38,12 @@ In this section, describe the source of the data, write a basic data dictionary 
 
 ```{r}
 # Load required data
+fatal_police_shooting <- read_csv("data/fatal-police-shootings.csv") 
+fatal_police_shooting_agencies <- read_csv("data/fatal-police-shootings-agencies.csv")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
 # Clean required data and prepare for analysis if needed. 
-
-
 ```
 
 ## Sentences to Engineer
@@ -47,8 +51,14 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: [Paste in sentence to engineer here]
+* **Sentence text**: 
+
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+
+```{r}
+fatal_race_armed <- fatal_police_shooting |>
+ filter(!is.na(race) & !is.na(armed_with))
+```
 
 ```{r}
 # Put code to reverse engineer sentence here

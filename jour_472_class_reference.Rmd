@@ -1,30 +1,13 @@
 ---
-title: "Class Reference"
-author: "Derek Willis"
-output:
-  html_document:
-    theme: cerulean
-    highlight: pygments
-    toc: true
-    toc_float:
-      collapsed: true
-      smooth_scroll: false
+title: "R Notebook"
+output: html_notebook
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
-## Introduction
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 
-Consider this a personal guide to the commands and functions you will learn. In general, when you come across an R command or function that you want to remember, put it in here along with a description of what it does and when you'd use it.
-
-### How to set the working directory
-
-The command to set a working directory is setwd(). For example, this sets the working directory to a directory called data_journalism_2024_fall inside a directory called jour472 located inside your home directory (the \~ is equivalent of /Users/[youruser] on a Mac).
-
-IMPORTANT or you WILL go insane: - remember quotations "" '' around variables
-
+```{r}
 ```{r}
 setwd("~/jour472/data_journalism_2024_fall")
 ```
@@ -32,7 +15,6 @@ setwd("~/jour472/data_journalism_2024_fall")
 ### How to install and load the tidyverse
 
 ```{r}
-install.packages("tidyverse")
 library(tidyverse)
 
 ```
@@ -167,4 +149,13 @@ clean_media_expenses |>
   summarise(total_amount = sum(amount)) |>
   arrange(desc(total_amount))
 ```
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 
