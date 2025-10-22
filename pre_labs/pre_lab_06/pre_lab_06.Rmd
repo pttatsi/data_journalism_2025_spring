@@ -57,7 +57,7 @@ Since we have five dataframes, we’re going to need to pass them as a list, mea
 
 ```{r}
 # bind_rows with list
-county_voters_combined <- bind_rows(list(county_voters_2016, county_voters_2018, county_voters_2020, county_voters_2022))
+county_voters_combined <- bind_rows(list(county_voters_2016, county_voters_2018, county_voters_2020, county_voters_2022, county_voters_2024))
 View(county_voters_combined)
 ```
 
