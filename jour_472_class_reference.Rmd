@@ -151,7 +151,27 @@ clean_media_expenses |>
 ```
 
 
+```{r}
+(across(blah, as.numeric, as.character)
+
 ```
+
+
+```{r}
+select(-same_name) #selects columns for removal 
+
+cbind (column_name) #bings column names as long as in the same exact order ie. all descending or ascending 
+```
+
+## Joins 
+
+**Inner_Join : when I only want the things that match from the left and right; or when I expect everything to match
+  anti_join: only returns columns that don't match; run it to check for things that are missing 
+Full_Join : will give you everything; 
+**Left_join : all the matches and everything from the left that didn't match; trying to add data to a data set
+Right Join: 
+
+
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
