@@ -73,7 +73,9 @@ glimpse(maryland_zcta)
 
 ```{r}
 combined_baltimore_calls <- maryland_zcta |>
-right_join(baltimore_911)
+  
+  
+  #right_join(baltimore_911)
 ```
 
 ## Answer questions

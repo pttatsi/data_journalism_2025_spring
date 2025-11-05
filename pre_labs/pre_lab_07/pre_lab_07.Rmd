@@ -33,8 +33,10 @@ To use the API, you need to [an API key from the Census Bureau](https://api.cens
 **Task** Replace YOUR KEY HERE in the codeblock below with your Census API Key (leave the quotemarks).
 
 ```{r echo=FALSE}
-#census_api_key("bf523cacbe0c8b02fe849fb1312a6a21c4124e7c", install=TRUE)
+census_api_key("bf523cacbe0c8b02fe849fb1312a6a21c4124e7c")
 ```
+
+
 ```{r}
 readRenviron("~/.Renviron")
 ```
