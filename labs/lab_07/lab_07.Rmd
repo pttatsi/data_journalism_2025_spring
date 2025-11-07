@@ -46,21 +46,22 @@ You'll also need to load the list of American Community Survey variables from th
 **Task** load the variables from the 2021 5-year ACS (which is called "acs5") and save them to a dataframe
 
 ```{r}
-acs_2023 <- load_variables(year = 2023, "acs5", cache = TRUE)
+acs_2023 <- load_variables(2023, "acs5")
 
 View(acs_2023)
 ```
 
 ## Answer questions
 
-**Q1** What is the Maryland jurisdiction with the lowest median age, according to the ACS 2023 5-year estimates? You will need to find the variable for median age first. **A1** Baltimore City has the lowest median age according to the ACS 2023 5-year estimates.
+**Q1** What is the Maryland jurisdiction with the lowest median age, according to the ACS 2023 5-year estimates? You will need to find the variable for median age first. 
+
+**A1** Baltimore City has the lowest median age according to the ACS 2023 5-year estimates.
 
 ```{r}
 md <- get_acs(geography = "county",
               variables = c(medage = "B01002_001"),
               state = "MD",
               year = 2023) 
-
 md |>
  arrange(estimate)
 ```
@@ -90,8 +91,7 @@ md
 6.  Add a column to the joined dataframe that calculates a rate of calls per 1,000 population.
 
 Which zip code has the highest rate of calls? Which has the lowest?
-variable names for total 18 and up population in acs 
-**A3**
+**A3** 20874, associated with Germantown, Maryland has the highest rate of calls. The zip with the lowest call rate is 20861, a small town in Montgomery county. 
 
 ```{r}
 moco_911 <- read_csv("data/montgomery_2022_overdoses.csv")
@@ -101,37 +101,43 @@ zip_moco <- moco_911 |>
   summarise(total_calls=n())
 
 acs_2023 |>
-filter(str_detect(label, "Estimate!!Total:!!18 years and over:")) 
-
+filter(str_detect(label, "Total!!18 years and over")) 
 
  #filter(!is.na(crime_reports)) 
 ```
 
+3. Get from the ACS data from all Maryland zip codes using that variable - you will need to specify an earlier year to get the data.
+5.  Join the ACS data to the Montgomery County zip code totals dataframe and rename the estimate column to a meaningful name you've given the ACS variable.
+6.  Add a column to the joined dataframe that calculates a rate of calls per 1,000 population.
 
 ```{r}
-#pop_18_up <- load_variables(2010, "sf1", cache = TRUE)
-allo_05 <- get_acs(
-  geography = "state",
-  variables = c(x18_over = "B99187_005"),
-  year = 2023
+md_zipcodes <- get_acs(
+  geography = "zcta",
+  variables = c(pop_over18 = "B19013_001"),
+  state = "MD",
+  year = 2019
 )
+```
 
 
-md_zipcodes <- get_acs(geography="zcta", variables = "B99187_005", year=2022) |>
-  select(-NAME)
+```{r}
+moco_md_acs <- zip_moco |>
+  mutate(zip = as.character(zip)) |>
+  left_join(md_zips |> mutate(GEOID = as.character(GEOID)),
+    by = c("zip" = "GEOID")) |>
+   mutate(rate_per_zip = total_calls / estimate * 10000) 
 
-md_zips_acs <- allo_05 |>
-  inner_join(md_zipcodes, by = c("GEOID")) |>
-  select(-variable.x, -variable.y, -estimate.y)
 ```
 
 **Q4** Using [CensusReporter.org](https://censusreporter.org/), examine the zip codes with the highest and lowest rates and compare and contrast their demographic profiles. Is there a story here?
 
-**A4** 
+**A4** The population of 20874, which is 62,233, is significantly higher than 20861, whose population sits at 3,020. The two zipcodes also differ in age and socioeconomic profile. The median age in 20874 is 37.8  indicates an urban community with young families with a median household income around $110k. 
+In 20861, though smaller and older, is weathier than 20861 with a median household income  of $176k. It is not new news that less dense and affluent areas will have less crime or emergency situations. The story might emerge from an investigation into the factors leading to higher call rates in densely populated areas. 
 
 **Q5** Go back to your joined dataframe from Q3 and add two more columns representing the minimum and maximum populations based on the estimate and margin of error, then calculate per capita rates for each. Do you get the same two zip codes for the highest and lowest as you did before? Does that give you more or less confidence in your answers to Q3?
 
-**A5**
-
+**A5**I get the same zipcode for the lowest which does give a bit more confidence in my answer but my max was not the same, in fact it was the same zip as the mininum. I am not sure why it did that.
 ```{r}
+  moco_md_acs <- moco_md_acs |> 
+  mutate(min=(estimate-moe), max=(estimate+moe)) |> drop_na()
 ```
