@@ -12,6 +12,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Load libraries and establish settings
 
 **Task** Create a codeblock and load appropriate packages and settings for this lab. We'll be making some charts, working with dates and retrieving Census data.
+```{r}
+library(tidycensus)
+library(tidyverse)
+library(janitor)
+library(dplyr)
+library(lubridate)
+library(stringr)
+```
 
 ## Load and modify data
 
@@ -20,6 +28,25 @@ knitr::opts_chunk$set(echo = TRUE)
 -   Prince George's County 911 Overdose Calls
 
 You will need to create columns for the date, week and month based on the existing `datetime` column.
+
+```{r}
+pgc_overdose <- read_csv("data/prince_georges_2022_overdoses.csv")
+```
+
+
+```{r}
+glimpse(pgc_overdose)
+```
+```{r}
+pgc_overdose <- pgc_overdose |>
+  mutate(
+    date = as.Date(datetime)) |>            
+    mutate(
+  week  = floor_date(datetime, unit = "week"),
+  month = floor_date(datetime, unit = "month")
+)
+```
+
 
 ## Questions
 
@@ -31,9 +58,31 @@ You will need to create columns for the date, week and month based on the existi
 
 Compare the results here to those from the pre_lab_08 bar chart - are there major differences in the months with the highest and lowest figures? Describe that below.
 
-**A1.**
+** I used month because I have a column with the exact dates already, it makes it easier for me to read the graph/ work on this lab. 
+
+**A1.** December accounted for the largest share of total calls in PG County (10.09%), which is higher than Baltimore County, where August had the highest share at 9.58%. 
 
 ```{r}
+pgc_month <- pgc_overdose |>
+  group_by(month) |>
+  summarise(count = n()) |>
+   mutate(
+    percent = (count/sum(count)) * 100
+  )
+```
+
+```{r}
+pgc_month |>
+  ggplot() +
+  geom_bar(aes(x=reorder(month,percent), weight=percent)) +
+  coord_flip() + 
+  theme_minimal() +
+  labs(
+    title= "Monthly Percent Change for PG County Overdose Calls",
+    x = "month",
+    y = "percent change",
+    caption = "Source: Prince George's County EMS"
+  )
 ```
 
 **Q2.** Let's visualize this data on a weekly basis using a line chart. As in Q1, generate a dataframe with the total number of calls for each week, and then create a line chart to show the distribution of calls over time. Your line chart must have:
@@ -44,11 +93,37 @@ Compare the results here to those from the pre_lab_08 bar chart - are there majo
 
 Describe the pattern of results; you may want to look at the data to dig into particular outliers.
 
-**A2.**
+**A2.** 
 
 ```{r}
-```
+pgc_week <- pgc_overdose |>
+  group_by(week) |>
+  summarise(count = n()) |>
+   mutate(
+    week = as.Date(week), 
+    percent = (count / sum(count)) * 100
+  )
 
+pgc_week |>
+   ggplot() +
+  geom_line(aes(x=week, y=percent)) +
+  scale_x_date(date_breaks = "2 week", date_labels = "%b %d %Y") 
++
+  theme(
+    axis.text.x = element_text(angle = 45,  hjust=1)
+  ) 
++ 
+  labs(
+    title="Weekly Percent Change for PG County Overdose Calls",
+    x = "week",
+    y = "percent change",
+    caption = "source: Prince George's County EMS "
+  )
+
+```
+```{r}
+glimpse(pgc_week)
+```
 **Q3.** A scatterplot is a type of chart that helps us see relationships between two variables. One variable goes on the x axis, the other on the y axis. For each row/observation in our data, a scatterplot puts a circle (or a "point") where the two variables intersect on a grid.
 
 Statisticians use scatterplots to show graphically whether one variable is correlated -- related, in a statistical sense -- with another variable. A classic example is the [relationship between ice cream sales and temperature](https://www.mathsisfun.com/data/scatter-xy-plots.html). The scatterplot below -- press play to load the image -- shows that relationship, that an increase in temperature is associated with an increase in ice cream sales. When it's 12C, sales are 200 dollars, and when it's hotter, 25C, sales are 600 dollars.
@@ -74,4 +149,25 @@ To answer this question, do the following:
 **A3.**
 
 ```{r}
+zip_doses <- pgc_overdose |>
+group_by(zipcode) |>
+summarise(total_calls = n()) |>
+ungroup()
+zip_doses
+
+acs_2023 <- load_variables(2023, "acs5") 
+
+md <- get_acs(geography = "zcta",
+              variables = c(medincome = "B06011_001"),
+              state = "MD",
+              year = 2019)
 ```
+```{r}
+md_zipcodes <- get_acs(
+  geography = "zcta",
+  variables = c(medincome = "B06011_001"),
+  state = "MD",
+  year = 2019
+)
+```
+

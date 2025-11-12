@@ -61,7 +61,9 @@ baltco_911_calls_by_month <- baltco_911_calls |>
   mutate(month = floor_date(date, unit = "month")) |> 
   group_by(month) |> 
   summarize(total_calls = n()) |> 
-  arrange(desc(total_calls))
+  mutate(percent = (total_calls / sum(total_calls)) * 100) |>
+  ungroup() |> 
+  arrange(desc(percent))
 
 baltco_911_calls_by_month
 ```
@@ -112,6 +114,7 @@ baltco_911_calls_by_month |>
 ```
 
 This is a very basic chart. But it's hard to derive much meaning from this chart, because the months aren't ordered from highest to lowest by total_calls We can fix that by using the reorder() function to do just that:
+
 
 ### Task 6: Run the following code
 
@@ -255,6 +258,9 @@ We'll set the date_breaks to appear for every week; if we wanted every month, we
 ### Task 14: Run the following code
 
 **Task** Run the following code. Explain what you see after running the code in the space below. **Answer** Its the same line graph but we have added a date for each call which overloads our x axis 
+```{r}
+glimpse(baltco_911_calls_by_date)
+```
 
 ```{r}
 baltco_911_calls_by_date |>
