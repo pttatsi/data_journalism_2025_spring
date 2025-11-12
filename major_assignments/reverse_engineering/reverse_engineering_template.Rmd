@@ -207,14 +207,32 @@ By race, 254 of the women were White, 88 were Black, 59 were Hispanic, 11 were A
 ### Sentence 2
 
 * **Sentence text**: Black men, 12 percent of the male population, make up 27 percent of the men shot and 36 percent of the unarmed deaths.
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Analysis summary**: According to our analysis, Black men, who make up about 12 percent of the male population, make up roughly 24 percent of all men shot. But among unarmed men shot, Black men make up more than 32 percent of those shot. Black men are more likely to be shot while unarmed. 
 
 ```{r}
 # Put code to reverse engineer sentence here
-  
-  
+us23 <- load_variables(2023, "acs5", cache=TRUE)
+
+us_male_population <- get_acs(geography="us", variables=c(Black="B01001B_002", Total="B01001_002"), year=2023) 
+
+black_male_population <- us_male_population |> select(variable, estimate) |> filter(variable=="Black") |> mutate(pct_total=(19716762/164545087)*100)
+
+
+
+
+black_men_total <- fatal_police_shooting |> filter(gender=="male") |> group_by(race) |> summarise(total=n()) |> mutate(pct_shot_by_race=(total/sum(total)*100))|>
+  arrange(desc(pct_shot_by_race)) 
+
+black_men_unarmed <- fatal_police_shooting |> filter(gender=="male") |> filter(armed_with=="unarmed") |> group_by(race) |> summarise(total=n()) |> mutate(pct_shot_unarmed=(total/sum(total)*100))|>
+  arrange(desc(pct_shot_unarmed))
 
 # Display results of code below this codeblock
+
+black_men_total
+
+black_men_unarmed
+
+black_male_population
 
 ```
 
@@ -260,7 +278,7 @@ armed_binary
 
 * **Sentence text**:  Since 2015, Black women have accounted for less than 1 percent of the overall fatal shootings in cases where race was known. But within this small subset, Black women, who are 13 percent of the female population, account for 20 percent of the women shot and killed and 28 percent of the unarmed deaths.
 
-* **Analysis summary**: We found that Black women accounted for 3.3% of the overall fatal shooting cases where race was known. This is not aligned with the Post's findings of less than 1%. Black women accounted for 19.2% of the women shot and killed and 5.2% of the unarmed deaths. Instead, Native, Asain, and Black men had higher percentages for unarmed deaths. This is probably because we don't know their exact timeframe, our filter is set from the start of 2015 to the end of 2020. 
+* **Analysis summary**: We found that Black women accounted for 3.3% of the overall fatal shooting cases where race was known. This is not aligned with the Post's findings of less than 1%. Black women accounted for 19.2% of the women shot and killed and 5.2% of the unarmed deaths. Instead, Native, Asain, and Black men had higher percentages for unarmed deaths. This is probably because we don't know their exact timeframe, our filter is set from the start of 2015 to the end of 2020. By our analysis, most of the Black women shot were armed with a gun and accounted for the smallest percentage of unarmed deaths at 5.2%.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -281,6 +299,8 @@ overall_per <- overall_per |>
   )
 
 # Display results of code below this codeblock
+
+view(overall_per)
 ```
 
 
@@ -301,6 +321,8 @@ women_shot_per <- women_shot_per |>
     race = str_replace_all(race, "O", "other"), 
     race = str_replace_all(race, "N", "native american"),
   )
+
+view(women_shot_per)
 ```
 
 
@@ -322,6 +344,8 @@ unarmed_per <- unarmed_per |>
     race = str_replace_all(race, "O", "other"), 
     race = str_replace_all(race, "N", "native american"),
   )
+
+view(unarmed_per)
 ```
 
 ```{r}
@@ -331,6 +355,4 @@ group_by(race,armed_with) |>
     count = n()
   )
 ```
-
-
 -30-
