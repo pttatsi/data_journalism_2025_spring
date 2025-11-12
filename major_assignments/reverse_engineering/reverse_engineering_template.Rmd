@@ -260,7 +260,7 @@ armed_binary
 
 * **Sentence text**:  Since 2015, Black women have accounted for less than 1 percent of the overall fatal shootings in cases where race was known. But within this small subset, Black women, who are 13 percent of the female population, account for 20 percent of the women shot and killed and 28 percent of the unarmed deaths.
 
-* **Analysis summary**: We found that Black women accounted for 3.3% of the overall fatal shooting cases where race was known. This is not aligned with the Post's findings of less than 1%. Black women accounted for 19.2% of the women shot and killed and 5.2% of the unarmed deaths. Instead, Native, Asain, and Black men had higher percentages for unarmed deaths. That is weird, the complete opposite of what was reported but we are not sure what is wrong with the code. 
+* **Analysis summary**: We found that Black women accounted for 3.3% of the overall fatal shooting cases where race was known. This is not aligned with the Post's findings of less than 1%. Black women accounted for 19.2% of the women shot and killed and 5.2% of the unarmed deaths. Instead, Native, Asain, and Black men had higher percentages for unarmed deaths. This is probably because we don't know their exact timeframe, our filter is set from the start of 2015 to the end of 2020. 
 
 ```{r}
 # Put code to reverse engineer sentence here
