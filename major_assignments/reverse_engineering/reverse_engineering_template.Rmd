@@ -100,6 +100,7 @@ select(race, gender, armed_with, name, date) |>
 view(all_men)
 ```
 
+
 ```{r}
 # Put code to reverse engineer sentence here
 woman_and_b <- fatal_race_armed |>
@@ -138,7 +139,7 @@ view(woman_and_b_unarmed)
 
 ```{r}
 # Put code to reverse engineer sentence here
-armed_with_male <- fatal_police_shooting |> filter(gender=="male") |> group_by(armed_with) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_male =(incident_total/sum(incident_total))*100)
+armed_with_male <- fatal_police_shooting |>  filter(year(date) <= 2020, !is.na(race)) |> filter(gender=="male") |> group_by(armed_with) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_male =(incident_total/sum(incident_total))*100)
 
 armed_with_female <- fatal_police_shooting |> filter(gender=="female") |> group_by(armed_with) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_female =(incident_total/sum(incident_total))*100)
 
@@ -182,6 +183,7 @@ woman_total_race <- woman_total_race |>
 
 ```
 
+
 ```{r}
 man_total_race <- all_men |>
  group_by(race) |>
@@ -207,6 +209,7 @@ By race, 254 of the women were White, 88 were Black, 59 were Hispanic, 11 were A
 ### Sentence 2
 
 * **Sentence text**: Black men, 12 percent of the male population, make up 27 percent of the men shot and 36 percent of the unarmed deaths.
+
 * **Analysis summary**: According to our analysis, Black men, who make up about 12 percent of the male population, make up roughly 24 percent of all men shot. But among unarmed men shot, Black men make up more than 32 percent of those shot. Black men are more likely to be shot while unarmed. 
 
 ```{r}
@@ -216,8 +219,6 @@ us23 <- load_variables(2023, "acs5", cache=TRUE)
 us_male_population <- get_acs(geography="us", variables=c(Black="B01001B_002", Total="B01001_002"), year=2023) 
 
 black_male_population <- us_male_population |> select(variable, estimate) |> filter(variable=="Black") |> mutate(pct_total=(19716762/164545087)*100)
-
-
 
 
 black_men_total <- fatal_police_shooting |> filter(gender=="male") |> group_by(race) |> summarise(total=n()) |> mutate(pct_shot_by_race=(total/sum(total)*100))|>
@@ -248,6 +249,7 @@ The first finding is that the majority of women killed were armed with a potenti
 ```{r}
 # Put code to reverse engineer sentence here
 armed_binary <- fatal_police_shooting |>
+   filter(year(date) <= 2020, !is.na(race)) |>
 
   filter(!armed_with %in% c("unknown", "undetermined") & !is.na(armed_with)) |>
   mutate(

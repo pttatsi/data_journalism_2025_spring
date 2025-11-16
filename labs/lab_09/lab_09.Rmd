@@ -1,0 +1,142 @@
+---
+title: "lab_09.Rmd"
+author: "Derek Willis"
+date: "2025-01-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## You will need
+
+-   A Datawrapper account
+-   Data in CSV files in the `data` folder
+
+## Load libraries and establish settings
+
+**Task** Create a codeblock and load appropriate packages and settings for this lab.
+
+```{r}
+# load libraries here
+library(tidyverse)
+library(janitor)
+```
+
+## Questions
+
+**Q1.** You want to explore the differences between the electoral performances of Dan Cox in 2022 and Larry Hogan in 2018. Except a map is probably not the best way to show that. Let's make a chart instead, and the type is up to you, but the goal is to clearly show the differences between the two.
+
+You MUST do the following things when answering this question: 
+\* Load the md_gov_county.csv and md_gov_county_18.csv files from the data folder 
+\*Join those dataframes, specifying the join column. 
+\* Add columns to generate percentages for Cox and Hogan. 
+\* Export that joined dataframe to a CSV file using `write_csv`. 
+\* Using that exported CSV, make a chart with Datawrapper. What kind of chart is up to you, so experiment with a few kinds of charts to see what answers the question above in the clearest way. 
+
+Your chart MUST: 
+\* Have a title, description and source that tells readers about the data. The title and description should highlight the most newsworthy or important aspect. \* Easily readable labels and values 
+\* Publish your chart
+\* Describe your thought process below - why you chose to make the chart you did - and add the URL of your chart.
+
+**A1.** I used grouped bars because it displayed my data the best. I hid the percent change column because it was irrelevant to my chart/audience. I chose to hide the votes on hover because it can visually be inferred that Hogan got more GOP votes in every Maryland county, hence the distinct red (for republican). 
+
+Link: <https://datawrapper.dwcdn.net/gMVwy/2/>
+
+```{r}
+md_gov_county_18 <- read_csv("data/md_gov_county_18.csv") 
+md_gov_county <- read_csv("data/md_gov_county.csv")
+```
+
+
+```{r}
+joined_county<- md_gov_county_18 |> left_join(md_gov_county, by= "GEOID")
+```
+
+```{r}
+hogan_cox_md_gov <- joined_county |>
+select(GEOID, County.x, Hogan, Cox) |>
+rename( County = County.x) 
+```
+
+```{r}
+hogan_cox_md_gov <- hogan_cox_md_gov |>
+mutate(
+  pct_chg = ((Cox - Hogan) / Hogan) * 100
+)
+```
+
+```{r}
+write_csv(hogan_cox_md_gov, "data/hogan_cox_md_gov.csv")
+```
+
+
+**Q2.** You're interested in seeing how the methods of voting have changed in Maryland since 2018. Using the `md_votes_by_type.csv` that has data from the top of the ticket (governor in 2018 and 2022, president in 2020), make a chart showing the percentage of votes cast in each category - early voting, election day and mail - over the three years. You'll need to make those percentages in R and then export the CSV using `write_csv`, then make the chart in Datawrapper. Have a title, description and source that tells readers about the data. The title and description should highlight the most newsworthy or important aspect.
+
+HINT: In Datawrapper's "Check and Describe" tab, you can click on a column to get the option of "hiding" it in any visualization.
+
+What do you think the story here is? Put the answer below along with the URL of your chart.
+
+**A2.**  Marylanders prefer election day voting over early voting and mail-in ballots. Even though 49% Marylanders casted mail-in votes during the pandemic and 29% voted early, these methods did not stick with them. 
+
+Link: <https://datawrapper.dwcdn.net/HwCxn/1/>
+
+```{r}
+md_votes_by_type <- read_csv("data/md_votes_by_type.csv")
+```
+```{r}
+md_votes_by_type <- md_votes_by_type |>
+  mutate(pct_early = Early / Total * 100) |>
+  mutate(pct_election = `Election Day` / Total * 100) |>
+  mutate(pct_mail = Mail / Total * 100) 
+
+write_csv(md_votes_by_type,"data/md_votes_by_type.csv")
+```
+
+**Q3.** You want to know more about the geography of 911 overdose calls in Montgomery County, Maryland, in 2022. To do that, you'll make a choropleth map in Datawrapper. You will need to:
+
+-   Read the file into R and create columns for the number of calls in each zip code and the percentage of all calls that number represents and then export that CSV to use in your map.
+-   Search for Maryland zip codes (use the 2020 zip codes) as the base map.
+-   Upload the CSV file.
+-   Change the tooltip to show both the number and the percentage (you can put them side by side or put one under the other). Make sure to properly format both numbers to make them readable.
+-   Add labels to your map that locate prominent places in the county.
+-   Have a title, description and source that tells readers about the data. The title and description should highlight the most newsworthy or important aspect.
+-   Make any other changes to data that helps you make a more accurate map.
+
+What do you think the story here is, and what would you want to know more about? Put the answer below along with the URL of your map.
+
+**A3.** Densely populated Montgomery county cities experience more overdose calls than less populous cities. I would want to know the rate of calls because even if one city has a low total, it could be experiencing 911 calls more often. This is important because younger populations, areas with a more robust nightlife, or neighborhoods with more socioeconomic stressors could have higher per-capita call rates even if the total call number is low. I could pull population data from census api, per us zip code and join with zip_summary to calculate these rates. 
+
+Link: <https://datawrapper.dwcdn.net/tu2KD/2/>
+
+```{r}
+moco_overdose_22 <- read_csv("data/montgomery_2022_overdoses.csv")
+```
+
+```{r}
+zip_summary <- moco_overdose_22 |>
+  group_by(zip) |>
+  summarise(
+    total_calls = n()   
+  ) |>
+  ungroup() |>
+  mutate(
+    total_all_calls = sum(total_calls),             
+    pct_of_calls = (total_calls / total_all_calls) * 100
+  ) |>
+  select(zip, total_calls, pct_of_calls)
+
+write_csv(zip_summary, "data/zip_summary.csv")
+```
+
+
+```{r}
+zip_summary |>
+  summarize(
+  mean_calls = mean(total_calls),
+  median_calls = median(total_calls),
+  max_calls = max(total_calls),
+  min_calls = min(total_calls))
+```
+
