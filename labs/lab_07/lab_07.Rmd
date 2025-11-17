@@ -123,8 +123,7 @@ md_zipcodes <- get_acs(
 ```{r}
 moco_md_acs <- zip_moco |>
   mutate(zip = as.character(zip)) |>
-  left_join(md_zips |> mutate(GEOID = as.character(GEOID)),
-    by = c("zip" = "GEOID")) |>
+  left_join(md_zips |> mutate(GEOID = as.character(GEOID)), by = c("zip" = "GEOID")) |>
    mutate(rate_per_zip = total_calls / estimate * 10000) 
 
 ```
