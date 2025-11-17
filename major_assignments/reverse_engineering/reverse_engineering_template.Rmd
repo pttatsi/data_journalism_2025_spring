@@ -235,12 +235,10 @@ filter(gender=="female") |> group_by(armed_with) |>
 summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_female =(incident_total/sum(incident_total))*100)
 
 
-
 total_gender <- fatal_police_shooting |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   group_by(gender) |>
   summarise(total_gender_count = n()) 
-
 
 
 unarmed_gender <- fatal_police_shooting |>
