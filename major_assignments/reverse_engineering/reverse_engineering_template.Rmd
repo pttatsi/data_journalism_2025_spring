@@ -1,7 +1,7 @@
 ---
 title: "Reverse Engineering Project"
-author: Princess Tatsi
-date: Oct. 18th 2025
+author: Sam, Princess, Ellie
+date: Oct. 18, 2025
 output:
   html_document:
     theme: cerulean
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Introduction 
 
 In this notebook, we are reverse engineering the story, [Nearly 250 women have been
-fatally shot by police since 2015](https://www.washingtonpost.com/graphics/2020/investigations/police-shootings-women/)
+fatally shot by police since 2015] (https://www.washingtonpost.com/graphics/2020/investigations/police-shootings-women/)
 
 ## Load libraries
 
@@ -27,24 +27,28 @@ Loading required libraries for this analysis.
 
 ```{r echo=FALSE, message=FALSE}
 library(tidyverse)
+library(tidycensus)
 library(janitor)
 library(lubridate)
 library(stringr)
-library(dplyr)
-library(tidycensus)
 ```
 
 ## Load and Cleaning Data
 
 In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
 
+**Answer** This data was compiled by The Washington Post using publicly-available government records, local news reports, social media and independent databases. After looking through the data, it appears very clean. The column names are all standardized, the date column is in the proper format, each entry is properly formatted for the column type. There don't appear to be duplicate entries. The only caveat is that this data is more recent that what The Washington Post used for its story. The article was published in 2020, but the database was continuously updated through December 2024. So even when filtering the data to only include values from before Sept. 4, 2020, they may have updated the dataset with more shootings that occurred during that time frame that were not included in their original analysis. Additionally, the story was published on Sept. 4, 2020, but it does not explicitly state when was the cutoff for the data included in their analysis. 
+
+
 ```{r}
 # Load required data
-fatal_police_shooting <- read_csv("data/fatal-police-shootings.csv") 
-fatal_police_shooting_agencies <- read_csv("data/fatal-police-shootings-agencies.csv")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
+
 # Clean required data and prepare for analysis if needed. 
+
+fatal_police_shooting_agencies <- read_csv("data/fatal-police-shootings-agencies.csv")
+fatal_police_shootings <- read_csv("data/fatal-police-shootings.csv")
 ```
 
 ## Sentences to Engineer
@@ -60,7 +64,7 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ```{r}
 # Put code to reverse engineer sentence here
-all_women <- fatal_police_shooting |>
+all_women <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
 select(race, gender, armed_with, name, date) |>
   filter(
@@ -79,7 +83,7 @@ all_women <- all_women |>
 
 
 
-all_men <- fatal_police_shooting |>
+all_men <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
 select(race, gender, armed_with, name, date) |>
   filter(
@@ -87,7 +91,7 @@ select(race, gender, armed_with, name, date) |>
   ) 
 view(all_men)
 
-woman_and_b <- fatal_police_shooting |>
+woman_and_b <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   mutate(year = year(date)) |>
   filter(
@@ -96,7 +100,7 @@ filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   ) |>
   select(race, gender, armed_with, name, date)
 
-woman_and_b_unarmed <- fatal_police_shooting |>
+woman_and_b_unarmed <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
 select(race, gender, armed_with, name, date) |>
 filter(str_detect(race, "B")) |>
@@ -111,27 +115,25 @@ view(woman_and_b)
 
 ### Sentence 2
 
-* **Sentence text**: Black men, 12 percent of the male population, make up 27 percent of the men shot and 36 percent of the unarmed deaths.
+* **Sentence text**:  Black men, who are about 12 percent of the total U.S. male population, make up 27 percent of the men shot and 36 percent of the unarmed deaths. 
 
-* **Analysis summary**: According to our analysis, Black men, who make up about 12 percent of the male population, make up roughly 24 percent of all men shot. But among unarmed men shot, Black men make up more than 32 percent of those shot. Black men are more likely to be shot while unarmed. 
+* **Analysis summary**: According to our analysis, Black men, who make up about 12 percent of the male population, make up roughly 26.4 percent of all men shot. Black men are more likely to be fatally shot by police. Among unarmed men shot, Black men make up more than 33.5 percent of those shot, meaning they are even more likely to be shot while unarmed. 
 
 ```{r}
 # Put code to reverse engineer sentence here
-us23 <- load_variables(2023, "acs5", cache=TRUE)
 
-us_male_population <- get_acs(geography="us", variables=c(Black="B01001B_002", Total="B01001_002"), year=2023) 
+us20 <- load_variables(2020, "acs5", cache=TRUE)
 
-black_male_population <- us_male_population |> select(variable, estimate) |> filter(variable=="Black") |> mutate(pct_total=(19716762/164545087)*100)
+us_male_population <- get_acs(geography="us", variables=c(Black="B01001B_002", Total="B01001_002"), year=2020) 
+
+black_male_population <- us_male_population |> select(variable, estimate) |> filter(variable=="Black") |> mutate(pct_total=(19716762/164545087)*100) 
 
 
-black_men_total <- fatal_police_shooting |> 
-  filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
-  filter(gender=="male") |> group_by(race) |> summarise(total=n()) |> mutate(pct_shot_by_race=(total/sum(total)*100))|>
+
+black_men_total <- fatal_police_shootings |> filter(gender=="male" & !is.na(race) & date<="2020-09-04") |> group_by(race) |> summarise(total=n()) |> mutate(pct_shot_by_race=(total/sum(total)*100)) |>
   arrange(desc(pct_shot_by_race)) 
 
-black_men_unarmed <- fatal_police_shooting |>
-  filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
-  filter(gender=="male") |> filter(armed_with=="unarmed") |> group_by(race) |> summarise(total=n()) |> mutate(pct_shot_unarmed=(total/sum(total)*100))|>
+black_men_unarmed <- fatal_police_shootings |> filter(gender=="male" & armed_with=="unarmed" & !is.na(race) & date<="2020-09-04") |> group_by(race) |> summarise(total=n()) |> mutate(pct_shot_unarmed=(total/sum(total)*100))|>
   arrange(desc(pct_shot_unarmed))
 
 # Display results of code below this codeblock
@@ -144,38 +146,24 @@ black_male_population
 
 ```
 
+
 ### Sentence 3
 
-* **Sentence text**: 
-- For both genders, a gun was the most common weapon. 
-- Of men killed, 57 percent were armed with a gun and of women, 44 percent. In other cases, women were armed with knives, cars, toy weapons, hammers and hatchets. 
---By race, 147 of the women killed were White, 48 Black and 29 Hispanic. Five were Native American, four were Asian and three were other races. In 11 cases, race could not be determined. 
---By percentages, men shot by police were less often White and more often Black or Hispanic. 
+* **Sentence text**: For both genders, a gun was the most common weapon. Of men killed, 57 percent were armed with a gun and of women, 44 percent. In other cases, women were armed with knives, cars, toy weapons, hammers and hatchets. By race, 147 of the women killed were White, 48 Black and 29 Hispanic. Five were Native American, four were Asian and three were other races. In 11 cases, race could not be determined. By percentages, men shot by police were less often White and more often Black or Hispanic. 
 
-* **Analysis summary**: 
---Our analysis shows that both genders frequently used a gun as their weapon of choice.
-- Half of the men, 58.5%, were armed with a gun, compared to women who chose a gun 45.9% of the time. 
-- By race, 150 of the women killed were white, 48 Black and 32 Hispanic.
-- By percentages, men shot by police were more often white by 50 percent and less often Black (26.4) or Hispanic (19.3%)
+**Analysis summary**: Our analysis also shows that guns were the most common weapon that people fatally shot by police were armed with for both genders. 57.5 percent of males were armed with a gun, while 43.1 percent of females were armed with a gun. Other top weapons for females included knives, vehicles, and "replicas," which refer to toy weapons or replicas of weapons. By race, 150 of the women were White, 48 were Black, 32 were Hispanic, 6 were Asian, 5 were Native American, and 2 were listed as other. 
+
+For men, while White males were the largest total group shop by police, they were less likely to be shot than Black males. For example, 26.4 percent of men fatally shot were Black, even though only about 12 percent of U.S. males are Black. Overall, our findings show similar trends to The Post's analysis,  but specific percentages and numbers vary even when filtered to the specific time period analyzed by The Post. 
+
+
 
 ```{r}
 # Put code to reverse engineer sentence here
-armed_with_male <- fatal_police_shooting |>  filter(date <= as.Date("2020-09-04"), !is.na(race)) |> filter(gender=="male") |> group_by(armed_with) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_male =(incident_total/sum(incident_total))*100)
+armed_with_male <- fatal_police_shootings |> filter(gender=="male"  & date <="2020-09-04") |> group_by(armed_with) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_male =(incident_total/sum(incident_total))*100)
 
-armed_with_male
+armed_with_female <- fatal_police_shootings |> filter(gender=="female" & date <="2020-09-04") |> group_by(armed_with) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_female =(incident_total/sum(incident_total))*100)
 
-armed_with_female <- fatal_police_shooting |> filter(gender=="female") |> group_by(armed_with) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_female =(incident_total/sum(incident_total))*100)
-
-armed_with_female
-
-woman_total_race <- all_women |>
-filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
- group_by(race) |>
- summarise(
-    total_per_race = n()
- )
-
-woman_total_race <- woman_total_race |>
+females_by_race <- fatal_police_shootings |> filter(gender=="female" & !is.na(race) & date <="2020-09-04") |> group_by(race) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |>
   mutate(
     race = str_replace_all(race, "A", "asian"),
     race = str_replace_all(race, "B", "black"),
@@ -185,18 +173,8 @@ woman_total_race <- woman_total_race |>
     race = str_replace_all(race, "N", "native american"),
   )
 
-woman_total_race
-
-man_total_race <- all_men |>
-filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
- group_by(race) |>
- summarise(
-    total_per_race = n()
- ) |>
-mutate(percent_of_men = total_per_race / sum(total_per_race) * 100)
-
-man_total_race <- man_total_race |>
-    mutate(
+males_by_race <- fatal_police_shootings |> filter(gender=="male" & !is.na(race) & date <="2020-09-04") |> group_by(race) |> summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(race_pct =(incident_total/sum(incident_total))*100) |>
+  mutate(
     race = str_replace_all(race, "A", "asian"),
     race = str_replace_all(race, "B", "black"),
     race = str_replace_all(race, "H", "hispanic"),
@@ -205,14 +183,18 @@ man_total_race <- man_total_race |>
     race = str_replace_all(race, "N", "native american"),
   )
 
-man_total_race
+black_male_population
 
 # Display results of code below this codeblock
 view(armed_with_male)
+
 view(armed_with_female)
-view(woman_total_race)
-view(man_total_race)
+
+view(females_by_race)
+
+view(males_by_race)
 ```
+
 
 ### Sentence 4
 
@@ -229,19 +211,19 @@ view(man_total_race)
 
 ```{r}
 # Put code to reverse engineer sentence here
-armed_with_female <- fatal_police_shooting |>
+armed_with_female <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
 filter(gender=="female") |> group_by(armed_with) |> 
 summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_female =(incident_total/sum(incident_total))*100)
 
 
-total_gender <- fatal_police_shooting |>
+total_gender <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   group_by(gender) |>
   summarise(total_gender_count = n()) 
 
 
-unarmed_gender <- fatal_police_shooting |>
+unarmed_gender <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
 group_by( gender, armed_with) |>
 filter(armed_with == "unarmed") |>
@@ -256,7 +238,7 @@ rates <- unarmed_gender |> left_join(total_gender, by="gender") |> mutate(rate_u
 
  
 
-mental_related_case <- fatal_police_shooting |>
+mental_related_case <- fatal_police_shootings |>
   filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   group_by(gender) |>
   summarise(
@@ -284,14 +266,14 @@ view(mental_related_case)
 
 * **Analysis summary**: 
 --We found that Black women accounted for 3.3% of the overall fatal shooting cases where race was known. This is not aligned with the Post's findings of less than 1%. 
--- Our findings show Black womem make up 12.7% of the total population, closely aligned with the Post's finding. They also accounted for 19.2 percent of the women shot and killed. 
+-- Our findings show Black women make up 12.7% of the total population, closely aligned with the Post's finding. They also accounted for 19.2 percent of the women shot and killed. 
 --We found Black women made up 5.2 percent of the unarmed deaths, not aligned with the Post's finding of 28 percent. 
---Our findings instead showed that Native, Asain, and Black men had the highest percentages for unarmed deaths. 
+--Our findings instead showed that Native, Asian, and Black men had the highest percentages for unarmed deaths. 
 
 Count incidents by combination of race + gender 
 ```{r}
 # Put code to reverse engineer sentence here
-overall_per <- fatal_police_shooting |>
+overall_per <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   group_by(race, gender) |>
   summarise(count = n()) |>
@@ -307,7 +289,7 @@ overall_per <- overall_per |>
     race = str_replace_all(race, "N", "native american"),
   )
 
-women_shot_per <- fatal_police_shooting |>
+women_shot_per <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   filter(gender == "female") |>
   group_by(race) |>
@@ -326,7 +308,7 @@ women_shot_per <- women_shot_per |>
 
 
 
-unarmed_per <- fatal_police_shooting |>
+unarmed_per <- fatal_police_shootings |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
 filter(armed_with == "unarmed") |>
 group_by(race, gender) |>
