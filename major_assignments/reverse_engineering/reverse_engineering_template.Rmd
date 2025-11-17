@@ -87,7 +87,7 @@ select(race, gender, armed_with, name, date) |>
   ) 
 view(all_men)
 
-woman_and_b <- fatal_race_armed |>
+woman_and_b <- fatal_police_shooting |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   mutate(year = year(date)) |>
   filter(
@@ -234,14 +234,14 @@ filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
 filter(gender=="female") |> group_by(armed_with) |> 
 summarise(incident_total=n()) |> arrange(desc(incident_total)) |> mutate(pct_female =(incident_total/sum(incident_total))*100)
 
-armed_with_female
+
 
 total_gender <- fatal_police_shooting |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
   group_by(gender) |>
   summarise(total_gender_count = n()) 
 
-total_race_gender
+
 
 unarmed_gender <- fatal_police_shooting |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
@@ -252,11 +252,11 @@ summarise(total_unarmed_gender_count = n())
 unarmed_gender <- unarmed_gender |>
 select(- armed_with) 
 
-unarmed_gender
+
 
 rates <- unarmed_gender |> left_join(total_gender, by="gender") |> mutate(rate_unarmed = total_unarmed_gender_count / total_gender_count * 100)
 
-rates 
+ 
 
 mental_related_case <- fatal_police_shooting |>
   filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
@@ -269,10 +269,14 @@ mental_related_case <- fatal_police_shooting |>
   mutate(
     pct_mental = total_mental / total_cases * 100)
 
-mental_related_case
+
 
 # Display results of code below this codeblock
-armed_binary
+view(armed_with_female)
+view(total_gender)
+view(unarmed_gender)
+view(rates)
+view(mental_related_case)
 ```
 
 
@@ -322,7 +326,7 @@ women_shot_per <- women_shot_per |>
     race = str_replace_all(race, "N", "native american"),
   )
 
-view(women_shot_per)
+
 
 unarmed_per <- fatal_police_shooting |>
 filter(date <= as.Date("2020-09-04"), !is.na(race)) |>
@@ -344,13 +348,6 @@ unarmed_per <- unarmed_per |>
 
 view(unarmed_per)
 
-all_women|>
-group_by(race,armed_with) |>
-  summarise(
-    count = n()
-  )
-
-
 
 us23 <- load_variables(2023, "acs5", cache=TRUE)
 
@@ -368,7 +365,8 @@ black_female_population
 # Display results of code below this codeblock
 
 view(overall_per)
+view(women_shot_per)
+view(unarmed_per)
+view(black_female_population)
 ```
-
-
 -30-
