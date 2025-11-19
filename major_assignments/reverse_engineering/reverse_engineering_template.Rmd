@@ -347,7 +347,7 @@ us_female_population <- get_acs(geography="us", variables=c(Black="B01001B_017",
   
 black_female_population <- us_female_population |> 
 select(variable, estimate) |> 
-tidyr::pivot_wider(
+pivot_wider(
     names_from = variable,
     values_from = estimate
   ) |>
