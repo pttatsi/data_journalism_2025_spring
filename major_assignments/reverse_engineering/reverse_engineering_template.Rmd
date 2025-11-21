@@ -58,9 +58,8 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 * **Sentence text**: The Post found only one other fatal shooting that closely matched Taylor’s case — a Black woman, unarmed, killed during a raid at home while a boyfriend shot at police... Of the 247 women fatally shot, 48 were Black and seven of those were unarmed.
 
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
-
-** We found that 243 women were fatally shot by the police between 2015-2020-09-04, according to data from the Post. 48 of them were Black and seven of them were unarmed. We can only confirm that 
+* **Analysis summary**: 
+** We found that 243 women were fatally shot by the police between 2015 to 2020-09-04, according to data from the Post. 48 of them were Black and seven of them were unarmed. We can only confirm that 
 
 ```{r}
 # Put code to reverse engineer sentence here

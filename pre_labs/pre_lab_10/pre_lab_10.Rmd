@@ -177,6 +177,7 @@ Let's dive back into zip codes and this time bring along data on notices of inte
 
 ```{r}
 foreclosure_zip <- read_csv("data/Maryland_Notices_of_Intent_to_Foreclose_by_Zip_Code.csv") |> clean_names()
+
 foreclosure_zip_march_2023 <- foreclosure_zip |> 
   select(zip, march_2023)
 
@@ -189,7 +190,8 @@ Now we can join the zip codes to the foreclosure data.
 **Task** Run the following code. Describe the output in the space below. **Answer** we have joined our md_zips with the foreclosure_zip data so we can now visualize the foreclosures on a map
 
 ```{r}
-zip_codes_with_foreclosures <- md_zips |> left_join(foreclosure_zip_march_2023, join_by(ZIPCODE1==zip))
+zip_codes_with_foreclosures <- md_zips |>
+left_join(foreclosure_zip_march_2023, join_by(ZIPCODE1==zip))
 ```
 
 Now we can use color to distinguish zip codes from each other. Let's use the number of foreclosure notices to start with:
