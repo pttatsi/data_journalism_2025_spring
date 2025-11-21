@@ -60,7 +60,9 @@ counties <- counties()
 md_counties <- counties |>
 filter(STATEFP == "24") |>
 clean_names() |>
-  rename( county = name)
+rename( county = name) |>
+select(county, geoid, geometry)
+  
 
 md_statewide_county_geo <- md_counties |>
 left_join(md_statewide_county, join_by(county))
