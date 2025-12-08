@@ -11,21 +11,80 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 library(tidyverse)
 library(janitor)
 library(tidycensus)
+library(dbplyr)
+library(tidyr)
 ```
 
 
 ```{r}
-umd_courses <- read_rds("course_data.rds")
+umd_courses <- read_csv("data/courses.csv")
 ```
+Q1: Isolate the spring and fall semesters, calculate the total number of courses per instructor and the total amount of seats they've offered. Do per term/year in one dataframe then overall in another dataframe. What are the patterns and findings? Do a cor test to see if the number of seats offered is related to the number of courses taught to check whether instructors with more courses also tend to teach larger total seat counts
+
+Finding: 
+
+A Pearson correlation was conducted to examine the relationship between the number of courses taught by each instructor and the total number of seats they offered. The correlation was statistically significant, r = .066, 95% CI [.043, .089], p < .001.
+
+The correlation of 0.06 indicates that our variables have a weak positive relationship. However, the effect size, p-value, was extremely small making the significance negligible. This means instructors who teach more courses do not necessarily offer more seats.Seat availability is driven by course type and scheduling structures, not teaching load count.
 
 ```{r}
+#finding total of courses taught by each professor from 2017 to 2025
+instructor_counts_all_sems <- umd_courses |>
+  separate_rows(instructors, sep = ";\\s*") |>
+  mutate(instructors = trimws(instructors)) |>
+  group_by(instructors) |>
+  summarise(n_courses = n(), .groups = "drop") 
 
+#Creating dataframe for each instructor and their department, decided not to join with instructor_counts because professors teach under multiple departments and instructor_counts is a total of all the classes they've taught, across departments, from 2017 to 2023. 
+
+instructor_department_ref <- umd_courses |>
+  separate_rows(instructors, sep = ";") |>
+  mutate(instructors = trimws(instructors)) |>
+  select(instructors, department) |>
+  distinct()
+
+#finding total of courses taught by each professor in the fall and spring terms from 2017 to 2023
+courses_fall_spring <- umd_courses |>
+  mutate(
+    year = as.integer(substr(term, 1, 4)),
+    sem_code = substr(term, 5, 6)
+  ) %>%
+  filter(
+    year >= 2017, year <= 2025,
+    sem_code %in% c("01", "08")
+  ) %>%
+  select(-year, -sem_code) 
+
+instructor_counts_fall_spring <- courses_fall_spring |>
+separate_rows(instructors, sep = ";") |>
+mutate(instructors = trimws(instructors)) |>
+group_by(instructors, term) |>
+summarise(n_courses = n(), 
+          n_seats   = sum(seats, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+instructor_total_major_semesters <- courses_fall_spring |>
+  separate_rows(instructors, sep = ";\\s*") |>
+  mutate(instructors = trimws(instructors)) |>
+  group_by(instructors) |>
+  summarise(n_courses = n(), 
+             n_seats   = sum(seats, na.rm = TRUE),
+            .groups = "drop") 
+
+instructor_total_major_semesters |>
+  arrange(desc(n_seats)) |>
+  head()
+```
+```{r}
+instructor_total_major_semesters |>
+  arrange(desc(n_courses)) |>
+  head()
+```
+```{r}
+cor.test(instructor_total_major_semesters$n_courses, 
+         instructor_total_major_semesters$n_seats)
 ```
 
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 
