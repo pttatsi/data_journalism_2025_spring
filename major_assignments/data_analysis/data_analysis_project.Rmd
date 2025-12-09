@@ -13,19 +13,19 @@ library(janitor)
 library(tidycensus)
 library(dbplyr)
 library(tidyr)
+library(tidytext)
 ```
 
 
 ```{r}
 umd_courses <- read_csv("data/courses.csv")
 ```
-Q1: Isolate the spring and fall semesters, calculate the total number of courses per instructor and the total amount of seats they've offered. Do per term/year in one dataframe then overall in another dataframe. What are the patterns and findings? Do a cor test to see if the number of seats offered is related to the number of courses taught to check whether instructors with more courses also tend to teach larger total seat counts
+Q1: Isolate the spring and fall semesters, calculate the total number of courses per instructor and the total amount of seats they've offered. Do per term/year in one dataframe then overall in another dataframe. What are the patterns and findings? Do a cor test to see if the number of seats offered is related to the number of courses taught to check whether instructors with more courses also tend to teach larger total seat counts. If no correlation, explain why 
 
-Finding: 
 
-A Pearson correlation was conducted to examine the relationship between the number of courses taught by each instructor and the total number of seats they offered. The correlation was statistically significant, r = .066, 95% CI [.043, .089], p < .001.
 
-The correlation of 0.06 indicates that our variables have a weak positive relationship. However, the effect size, p-value, was extremely small making the significance negligible. This means instructors who teach more courses do not necessarily offer more seats.Seat availability is driven by course type and scheduling structures, not teaching load count.
+A Pearson correlation was conducted to examine the relationship between the number of courses taught by each instructor and the total number of seats they offered. The correlation was statistically significant, r = .066, p < .001, however, it was a very weak positive relationship. The effect size is negligible because the correlation is almost close to zero at 0.66. This suggests that instructors who teach more courses do not meaningfully offer more seats. This is because a professor could teach many seminar classes that three registered students. Therefore, the amount of classes instructors teach at UMD appears to be driven by other independent variables such as employment status (lecturer, adjunct) and institutional policies.
+
 
 ```{r}
 #finding total of courses taught by each professor from 2017 to 2025
@@ -55,6 +55,21 @@ courses_fall_spring <- umd_courses |>
   ) %>%
   select(-year, -sem_code) 
 
+#creating a column for standard semester dates 
+courses_fall_spring <- courses_fall_spring |>
+  mutate(
+    term_code = as.character(term),
+    year = str_sub(term_code, 1, 4),
+    term_suffix = str_sub(term_code, 5, 6),
+    start_date = case_when(
+      term_suffix == "01" ~ ymd(paste0(year, "-01-24")),  # Spring
+      term_suffix == "08" ~ ymd(paste0(year, "-08-26")),  # Fall
+      TRUE ~ NA_Date_
+    )) |>
+  select(-term_code, -term_suffix, -year)
+
+
+
 instructor_counts_fall_spring <- courses_fall_spring |>
 separate_rows(instructors, sep = ";") |>
 mutate(instructors = trimws(instructors)) |>
@@ -64,27 +79,58 @@ summarise(n_courses = n(),
     .groups = "drop"
   )
 
+
 instructor_total_major_semesters <- courses_fall_spring |>
   separate_rows(instructors, sep = ";\\s*") |>
   mutate(instructors = trimws(instructors)) |>
   group_by(instructors) |>
   summarise(n_courses = n(), 
              n_seats   = sum(seats, na.rm = TRUE),
-            .groups = "drop") 
+            .groups = "drop") |>
+   arrange(desc(n_seats)) 
 
-instructor_total_major_semesters |>
-  arrange(desc(n_seats)) |>
-  head()
 ```
-```{r}
-instructor_total_major_semesters |>
-  arrange(desc(n_courses)) |>
-  head()
-```
+
+
 ```{r}
 cor.test(instructor_total_major_semesters$n_courses, 
          instructor_total_major_semesters$n_seats)
 ```
 
+Q2: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
 
+A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department wider ratio of more professors than total seats per observed semester. 
+
+```{r}
+prof_to_depart <- courses_fall_spring |>
+   group_by(department, term) |>
+  summarise(
+    total_prof_depart = n_distinct(instructors)
+  ) |>
+  arrange(desc(total_prof_depart))
+
+
+seats_to_depart <- courses_fall_spring |>
+group_by(department, term) |>
+summarise(
+  total_seats_depart = sum(seats)
+) |>
+  arrange(desc(total_seats_depart))
+```
+
+Q3: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
+
+A3: We were curious to see what courses had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, I see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
+
+```{r}
+keywords <- c("diversity", "equity", "race", "immigration", "trump", "gender")
+
+chosen_words <- courses_fall_spring |>
+  unnest_tokens(word, description) |> 
+  filter(word %in% keywords) |>             
+  group_by(start_date, word) |>                    
+  summarise(count = n(), .groups = "drop") |>
+  arrange(desc(count))
+
+```
 

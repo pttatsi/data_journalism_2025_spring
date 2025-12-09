@@ -61,11 +61,11 @@ HINT: you should use filter() just once, and inside your filter you want to look
 
 When you have found as many as possible, save the result to a new dataframe called `pg_schools`. How many records did you find?
 
-A1: I found 1,190 rows with Prince George in the Vendor name 
+A1: I found 109 rows related to Prince George's County School system in the vendor name column
 
 ```{r}
 pg_schools <- cleaned_payments |>
-  filter(str_detect(vendor_name, "PRINCE GEORGE|PRINCE GEORGE'S|PRINCE GEORGE'S COUNTY|PRINCE GEORGES"))
+filter(str_detect(vendor_name, "PRINCE GEORGE'S COMM COLLG|PRINCE GEORGES COUNTY PUBLIC SCHOOLS|PRINCE GEORGE'S COMMUNITY COLLEGE|PRINCE GEORGES COMM COLLEGE"))
 
 pg_schools
 ```
@@ -88,8 +88,10 @@ Look carefully at that list - what cleaning will it require to ensure that you h
 A3.
 
 ```{r}
-pg_schools |>
-filter(str_detect(agency_name, "CAPITAL")) 
+umd_payments <- cleaned_payments |>
+filter(vendor_name == "UNIVERSITY OF MARYLAND")
+
+umd_payments
 ```
 
 Q4: You want to understand how much state grant money went to stem cell research projects each fiscal year. Search the data to find grants that fit that description. Once you find which column(s) contain the information you want, your code should find just the grants for stem cell research in a single filter. Then calculate the total amount of money for each fiscal year. Write a sentence summarizing how stem cell research funding has changed over time.
