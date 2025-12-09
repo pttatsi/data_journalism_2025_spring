@@ -17,7 +17,9 @@ library(tidyr)
 
 
 ```{r}
-umd_courses <- read_csv("data/courses.csv")
+umd_courses <- read_csv("data/courses.csv") #data download 
+
+#cleaning code possibly 
 ```
 Q1: Isolate the spring and fall semesters, calculate the total number of courses per instructor and the total amount of seats they've offered. Do per term/year in one dataframe then overall in another dataframe. What are the patterns and findings? Do a cor test to see if the number of seats offered is related to the number of courses taught to check whether instructors with more courses also tend to teach larger total seat counts
 
