@@ -120,7 +120,7 @@ summarise(
 
 Q3: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
 
-A3: We were curious to see what courses had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, I see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
+A3: We were curious to see what courses, in which semesters, had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, we see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
 
 ```{r}
 keywords <- c("diversity", "equity", "race", "immigration", "trump", "gender")
