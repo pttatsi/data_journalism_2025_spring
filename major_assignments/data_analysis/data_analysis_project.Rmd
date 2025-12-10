@@ -22,7 +22,7 @@ umd_courses <- read_csv("data/courses.csv")
 ```
 Q1: Isolate the spring and fall semesters, calculate the total number of courses per instructor and the total amount of seats they've offered. Do per term/year in one dataframe then overall in another dataframe. What are the patterns and findings? Do a cor test to see if the number of seats offered is related to the number of courses taught to check whether instructors with more courses also tend to teach larger total seat counts. If no correlation, explain why 
 
-
+To see which professors are teaching less or more
 
 A Pearson correlation was conducted to examine the relationship between the number of courses taught by each instructor and the total number of seats they offered. The correlation was statistically significant, r = .066, p < .001, however, it was a very weak positive relationship. The effect size is negligible because the correlation is almost close to zero at 0.66. This suggests that instructors who teach more courses do not meaningfully offer more seats. This is because a professor could teach many seminar classes that three registered students. Therefore, the amount of classes instructors teach at UMD appears to be driven by other independent variables such as employment status (lecturer, adjunct) and institutional policies.
 
@@ -89,6 +89,7 @@ instructor_total_major_semesters <- courses_fall_spring |>
             .groups = "drop") |>
    arrange(desc(n_seats)) 
 
+instructor_total_major_semesters
 ```
 
 
@@ -99,7 +100,7 @@ cor.test(instructor_total_major_semesters$n_courses,
 
 Q2: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
 
-A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department wider ratio of more professors than total seats per observed semester. 
+A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department wider ratio of more professors than total seats per observed semester. This is probably because a lot of english courses are seminars or independent studies 
 
 ```{r}
 prof_to_depart <- courses_fall_spring |>

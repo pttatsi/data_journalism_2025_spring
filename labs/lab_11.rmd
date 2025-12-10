@@ -39,17 +39,17 @@ Let's get to scraping.
 ```{r}
 state_md_url <- "https://www.mbp.state.md.us/disciplinary_2024.aspx" |>
   read_html() |>
-  html_table() |>
+  html_table()|>
   as.data.frame() |>
   clean_names() |>
-mutate(date = mdy(date)) |>
+mutate(date = mdy(date)) 
+
+state_md_url |>
   group_by(sanction) |>
  summarise(
   count= n()
  ) |>
 arrange(desc(count))
-
-state_md_url
 ```
 
 **Q2** Next, let's scrape the list of press releases from Maryland's Office of the Public Defender, <https://www.opd.state.md.us/press-releases>. This isn't a table, so you'll need to use `html_elements()` and your browser's inspector and do some clean up on the results. The result should be a dataframe with two columns that contain the date and title, and the date column should have a date datatype. The challenge here is figuring out how to isolate the releases.
@@ -126,6 +126,11 @@ rename(url = value)
 
 combined_results<- bind_cols(results_h2, results_dates, results_url)
 ```
+
+
+
+
+
 
 Notes: 
 ```{r}
