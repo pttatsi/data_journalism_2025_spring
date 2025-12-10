@@ -1,7 +1,13 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "R Notebook Data Analysis "
+author: "Princess, Devin, Cecilia"
+date: "2025-12-01"
+output: html_document
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
@@ -15,16 +21,29 @@ library(dbplyr)
 library(tidyr)
 library(tidytext)
 ```
-
+## Load Data for Analysis
 
 ```{r}
 umd_courses <- read_csv("data/courses.csv")
 ```
-Q1: Isolate the spring and fall semesters, calculate the total number of courses per instructor and the total amount of seats they've offered. Do per term/year in one dataframe then overall in another dataframe. What are the patterns and findings? Do a cor test to see if the number of seats offered is related to the number of courses taught to check whether instructors with more courses also tend to teach larger total seat counts. If no correlation, explain why 
+
+## Milestone 02 !! Understanding the Dataset and Limits.
+
+This UMD course data is similar to the one from the lab before. However the differences are shown in th amount of variables. There is only 7 columns in this UMD_COURSES. Section column and syllabus_count are absent from this data set, so this takes away some of the more statistical quantitative analysis that can be made. But the department, seats, descriptions, course title and professor name can provide enough of the questions. 
+
+Also this specific data set only goes into the spring of 2023. This limits some of the questions I provided, like the one about the "contemporary Trump Department of Education's" definition of professional. Although, this might prove some type of correlation between the reasoning stripping the professional label from certain majors and  the trend of those courses availability.On the other hand, I am not sure if that holds any relevance since this data is from nearly three years ago. 
+
+Any of the questions that have to do with numbers will be fine.  
+
+
+## Milestone 3-- :Analysis Questions and reflections 
+
+
+**Q1**: Isolate the spring and fall semesters, calculate the total number of courses per instructor and the total amount of seats they've offered. Do per term/year in one dataframe then overall in another dataframe. What are the patterns and findings? Do a cor test to see if the number of seats offered is related to the number of courses taught to check whether instructors with more courses also tend to teach larger total seat counts. If no correlation, explain why 
 
 
 
-A Pearson correlation was conducted to examine the relationship between the number of courses taught by each instructor and the total number of seats they offered. The correlation was statistically significant, r = .066, p < .001, however, it was a very weak positive relationship. The effect size is negligible because the correlation is almost close to zero at 0.66. This suggests that instructors who teach more courses do not meaningfully offer more seats. This is because a professor could teach many seminar classes that three registered students. Therefore, the amount of classes instructors teach at UMD appears to be driven by other independent variables such as employment status (lecturer, adjunct) and institutional policies.
+**A** A Pearson correlation was conducted to examine the relationship between the number of courses taught by each instructor and the total number of seats they offered. The correlation was statistically significant, r = .066, p < .001, however, it was a very weak positive relationship. The effect size is negligible because the correlation is almost close to zero at 0.66. This suggests that instructors who teach more courses do not meaningfully offer more seats. This is because a professor could teach many seminar classes that three registered students. Therefore, the amount of classes instructors teach at UMD appears to be driven by other independent variables such as employment status (lecturer, adjunct) and institutional policies.
 
 
 ```{r}
@@ -97,9 +116,9 @@ cor.test(instructor_total_major_semesters$n_courses,
          instructor_total_major_semesters$n_seats)
 ```
 
-Q2: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
+**Q2**: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
 
-A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department wider ratio of more professors than total seats per observed semester. 
+**A2** : The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department wider ratio of more professors than total seats per observed semester. 
 
 ```{r}
 prof_to_depart <- courses_fall_spring |>
@@ -118,9 +137,9 @@ summarise(
   arrange(desc(total_seats_depart))
 ```
 
-Q3: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
+**Q3**: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
 
-A3: We were curious to see what courses, in which semesters, had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, we see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
+**A3**: We were curious to see what courses, in which semesters, had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, we see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
 
 ```{r}
 keywords <- c("diversity", "equity", "race", "immigration", "trump", "gender")
