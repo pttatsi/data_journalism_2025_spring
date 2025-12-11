@@ -110,7 +110,6 @@ prof_to_depart <- courses_fall_spring |>
   ) |>
   arrange(desc(total_prof_depart))
 
-
 seats_to_depart <- courses_fall_spring |>
 group_by(department, term) |>
 summarise(
