@@ -14,6 +14,8 @@ library(tidycensus)
 library(dbplyr)
 library(tidyr)
 library(tidytext)
+library(lubridate)
+library(ggthemes)
 ```
 
 
@@ -133,4 +135,37 @@ chosen_words <- courses_fall_spring |>
   arrange(desc(count))
 
 ```
+Q4: Is there a change in the mentions of Artificial intelligence in courses?
+A4: Through this question we hoped to find out whether the recent uptick in AI usage throughout the world is reflected in the course offerings at UMD. While this data set is two years old there is still a significant increase in the number of courses with a focus on AI. The biggest increase was from the Fall 2022 semester to the Spring 2023 semester where the number of courses more than doubled. This is likely due to the release of ChatGPT in November of 2022. Even though the number of courses dropped again in Fall 2023, it shows how there was a continued interest in AI throughout UMD. 
 
+```{r}
+
+artificial_intelligence <- courses_fall_spring |>
+  mutate( title = str_to_upper(title), description = str_to_upper(description)) |>
+  
+  filter(
+    str_detect(title,"ARTIFICIAL INTELLIGENCE") | str_detect(description, "ARTIFICIAL INTELLIGENCE") | str_detect(title, " AI ") | str_detect(description, " AI ")) |>
+  group_by(start_date) |>
+summarise(
+  semester_total = n(),
+  .groups = "drop"
+) |>
+arrange(desc(start_date))
+ 
+artificial_intelligence |>
+  ggplot() + 
+  geom_line(aes(x=start_date, y=semester_total), size=1.2)+
+
+labs(title = "Mentions of Artificial Intelligence in Course Title and Description", x= "Semester", y = "Number of Mentions")+
+  scale_y_continuous(n.breaks = 15) +
+    scale_x_date(
+    breaks = artificial_intelligence$start_date,
+    date_labels = "%b %Y"  
+  ) +
+  theme_minimal()+
+   theme(
+    axis.text.x = element_text(angle = 25,  hjust=1),
+     plot.margin = margin(10, 10, 35, 10)
+  )
+  
+```
