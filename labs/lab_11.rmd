@@ -71,7 +71,8 @@ separate(value, c("date", "title"), sep=":", extra = "merge")
 results_clean <- results %>%
 filter(date != "", !is.na(title)) |>
 mutate(date = mdy(date)) |>
-mutate(has_police = str_detect(title, regex("Police", ignore_case = TRUE)))
+mutate(has_police = str_detect(title, regex("Police", ignore_case = TRUE))) |>
+arrange(desc(has_police))
   
 
 results_clean
@@ -88,6 +89,10 @@ When you're done, rename the columns so they make sense, then make sure the date
 Finally, tell me what questions you could ask of this data if you had all of his press releases. Be creative.
 
 **A3** 
+--> Are there recurring topics/words in titles over time? Use the tidytext dataframe "stop-words" to filter out common words and then filter for most occuring words
+--> Which departments or policy areas are mentioned most frequently?
+--> Calculate the amount of money given as funding and to which organizations? 
+--> How many policies/resolutions/bills have been enacted through his office? 
 
 ```{r}
 van_hollen_results <-read_html("https://www.vanhollen.senate.gov/news/press-releases")
