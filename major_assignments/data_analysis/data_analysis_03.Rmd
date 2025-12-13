@@ -1,0 +1,279 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(tidycensus)
+library(dbplyr)
+library(tidyr)
+library(tidytext)
+```
+
+
+```{r}
+umd_courses <- read_csv("data/courses.csv")
+```
+Set-Up: Creating Courses Fall-Spring semesters only 
+
+```{r}
+#finding total of courses taught by each professor in the fall and spring terms from 2017 to 2023
+courses_fall_spring <- umd_courses |>
+  mutate(
+    year = as.integer(substr(term, 1, 4)),
+    sem_code = substr(term, 5, 6)
+  ) %>%
+  filter(
+    year >= 2017, year <= 2025,
+    sem_code %in% c("01", "08")
+  ) %>%
+  select(-year, -sem_code) 
+
+#creating a column for standard semester dates 
+courses_fall_spring <- courses_fall_spring |>
+  mutate(
+    term_code = as.character(term),
+    year = str_sub(term_code, 1, 4),
+    term_suffix = str_sub(term_code, 5, 6),
+    start_date = case_when(
+      term_suffix == "01" ~ ymd(paste0(year, "-01-24")),  
+      term_suffix == "08" ~ ymd(paste0(year, "-08-26")),  
+      TRUE ~ NA_Date_
+    )) |>
+  select(-term_code, -term_suffix, -year)
+
+```
+
+
+Q1: Popular discourse often claims that humanities are declining while STEM fields dominate the future. To explore this at a micro level, calculate the total seat percentages for the English and Computer Science departments during fall semesters. Do you observe any patterns or notable differences? If so, provide an analysis explaining why these differences might exist.
+
+The English department offered 52,394 seats total in the fall from 2018 to 2023. Fall 2023 had the lowest total seats (n= 7,678) and lowest percentage of total (14.65%), approximately 2.3 percentage points lower than most other years. This is a noticeable contraction or decreased of total seats. From 2018 through 2022, seat totals range from 8,700 to 9,200, percentages cluster tightly around ~17%, even Fall 2020, with the pandemic as an independent variable, stays within this band. This change suggests there was a consistent variable in the previous years that is now absent or much lower thus impacting the total number of seats in Fall 2023; It could be university policies, enrollment trends, economic pressures (job market) or instructor availability. 
+
+
+```{r}
+fall_english_department <- courses_fall_spring |>
+filter(department == "English", 
+        month(start_date) == 8) |>
+  mutate(year = year(start_date))
+
+
+fall_CS_department <- courses_fall_spring |>
+filter(department == "Computer Science", 
+        month(start_date) == 8) |>
+  mutate(year = year(start_date))
+
+fall_journalism_department <- courses_fall_spring |>
+filter(department == "Journalism", 
+        month(start_date) == 8) |>
+  mutate(year = year(start_date))
+
+# Some courses are exactly the same but have special lettering for honors students so this standardizes the id column so we get clean percentages 
+
+fall_english_department <- fall_english_department |>
+   mutate(base_course = str_extract(id, "^[A-Z]+\\d+"))|>
+  select(-id) |>
+  rename(id= base_course)
+
+fall_CS_department <- fall_CS_department |>
+   mutate(base_course = str_extract(id, "^[A-Z]+\\d+"))|>
+  select(-id) |>
+  rename(id= base_course)
+
+fall_journalism_department <- fall_journalism_department |>
+   mutate(base_course = str_extract(id, "^[A-Z]+\\d+"))|>
+  select(-id) |>
+  rename(id= base_course)
+```
+
+
+Creating data frames with total percentages seat for each department we're interested in observing
+```{r}
+seats_by_year_english <- fall_english_department |>
+  group_by(year) |>
+  summarise(
+    total_seats = sum(seats, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+seats_by_year_english <- seats_by_year |>
+  mutate(
+    percent_of_total = total_seats / sum(total_seats) * 100
+  )
+
+seats_by_year_CS <- fall_CS_department |>
+  group_by(year) |>
+  summarise(
+    total_seats = sum(seats, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+seats_by_year_CS <- seats_by_year_CS |>
+  mutate(
+    percent_of_total = total_seats / sum(total_seats) * 100
+  )
+
+seats_by_year_journalism <- fall_journalism_department |>
+  group_by(year) |>
+  summarise(
+    total_seats = sum(seats, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+seats_by_year_journalism <- seats_by_year_journalism |>
+  mutate(
+    percent_of_total = total_seats / sum(total_seats) * 100
+  )
+```
+
+** English Department offered 52,392 over the fall semesters from 2018 to 2023
+```{r}
+seats_by_year_english |>
+  summarise(sum(total_seats))
+```
+** Computer Science offered 60,976 total seats over the fall semesters, which is 8,582 more seats than English department 
+
+```{r}
+seats_by_year_CS |>
+  summarise(sum(total_seats))
+```
+**  
+
+```{r}
+ggplot(seats_by_year_english, aes(x = year, y = percent_of_total, group = 1)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  scale_y_continuous(
+     limits = c(14.5, 
+               max(seats_by_year_english$percent_of_total) * 1.05), 
+    n.breaks = 10,
+    labels = scales::percent_format(scale = 1)
+  ) +
+  labs(
+    title = "Percentage of fall seats offered by the English Department\n starts high in 2018 but plummets from 2022 to 2023",
+    x = "Fall Year",
+    y = "Percentage of Total Seats"
+  ) +
+  theme_minimal()
+```
+** The number of seats offered by the computer science department started gradually increasing in Fall 2018, reaching peak in 2022. However, the department experiences a significant loss of seats in Fall 2023, though it is a much smaller amount/ difference when compared to the English and Journalism departments. 
+
+```{r}
+ggplot(seats_by_year_CS, aes(x = year, y = percent_of_total, group = 1)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  scale_y_continuous(
+    n.breaks = 10,
+    labels = scales::percent_format(scale = 1)
+  ) +
+  labs(
+    title = "Percentage of fall semester seats offered by CS department\nupticks from 2018 to the peak in 2022 before moderately declining in 2023",
+    x = "Fall Year",
+    y = "Percentage of Total Seats"
+  ) +
+  theme_minimal()
+```
+** One major that bridges the gap between STEM and Humanities: Journalism 
+
+** Peak of seat offering in 2022 with sharp decline in 2023. Journalism can be STEM oriented but mostly leans towards the humanities and is generally treated as such. The department offered its least amount of seats in 2023, with the same drastic drop as the English department. This leads us to ask what third independent variable was affecting humanities departments? It could be university policies, enrollment trends, economic pressures (job market) or instructor availability. 
+
+```{r}
+ggplot(seats_by_year_journalism, aes(x = year, y = percent_of_total, group = 1)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  scale_y_continuous(
+    n.breaks = 10,
+    labels = scales::percent_format(scale = 1)
+  ) +
+  labs(
+    title = "Percentage of fall semester seats offered by Journalism department\n begins relatively high in 2018,reaches peak in 2022\nbefore sharply declining in 2023.",
+    x = "Fall Year",
+    y = "Percentage of Total Seats"
+  ) +
+  theme_minimal()
+```
+
+
+Q2: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
+
+A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department had a wider ratio of more professors than total seats per observed semester. This is probably because a lot of english courses are seminars or independent studies 
+
+```{r}
+prof_to_depart <- courses_fall_spring |>
+   group_by(department, term) |>
+  summarise(
+    total_prof_depart = n_distinct(instructors)
+  ) |>
+  arrange(desc(total_prof_depart))
+
+seats_to_depart <- courses_fall_spring |>
+group_by(department, term) |>
+summarise(
+  total_seats_depart = sum(seats)
+) |>
+  arrange(desc(total_seats_depart))
+```
+
+Q3: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
+
+A3: We were curious to see what courses, in which semesters, had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, we see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
+
+```{r}
+keywords <- c("diversity", "equity", "race", "immigration", "trump", "gender")
+
+chosen_words <- courses_fall_spring |>
+  unnest_tokens(word, description) |> 
+  filter(word %in% keywords) |>             
+  group_by(start_date, word) |>                    
+  summarise(count = n(), .groups = "drop") |>
+  arrange(desc(count))
+
+```
+
+Q4: Is there a change in the mentions of Artificial intelligence in courses?
+
+A4: Through this question we hoped to find out whether the recent uptick in AI usage throughout the world is reflected in the course offerings at UMD. While this data set is two years old there is still a significant increase in the number of courses with a focus on AI. The biggest increase was from the Fall 2022 semester to the Spring 2023 semester where the number of courses more than doubled. This is likely due to the release of ChatGPT in November of 2022. Even though the number of courses dropped again in Fall 2023, it shows how there was a continued interest in AI throughout UMD. 
+
+```{r}
+artificial_intelligence <- courses_fall_spring |>
+  mutate( title = str_to_upper(title), description = str_to_upper(description)) |>
+  
+  filter(
+    str_detect(title,"ARTIFICIAL INTELLIGENCE") | str_detect(description, "ARTIFICIAL INTELLIGENCE") | str_detect(title, " AI ") | str_detect(description, " AI ")) |>
+  group_by(start_date) |>
+summarise(
+  semester_total = n(),
+  .groups = "drop"
+) |>
+arrange(desc(start_date))
+ 
+artificial_intelligence |>
+  ggplot() + 
+  geom_line(aes(x=start_date, y=semester_total), size=1.2)+
+
+labs(title = "Mentions of Artificial Intelligence in Course Title and Description", x= "Semester", y = "Number of Mentions")+
+  scale_y_continuous(n.breaks = 15) +
+    scale_x_date(
+    breaks = artificial_intelligence$start_date,
+    date_labels = "%b %Y"  
+  ) +
+  theme_minimal()+
+   theme(
+    axis.text.x = element_text(angle = 25,  hjust=1),
+     plot.margin = margin(10, 10, 35, 10)
+  )
+  
+```
+
+
+

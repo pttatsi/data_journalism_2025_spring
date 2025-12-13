@@ -72,24 +72,26 @@ pg_schools
 
 Q2: Using that `pg_schools` dataframe, write code to calculate the total amount of payments to the Prince George's County School system for each fiscal year. Which fiscal year had the largest total amount? Are there any aspects of the results that stand out to you?
 
-A2: 
+A2: The year 2008 had the largest total amount of payments to PG county school system. The range of numbers stands out to me, why did the total reach 1 billion for three years straight? Why did 2023 recieve such little payment compared to the rest? These are extreme outliers 
 
 ```{r}
 pg_schools |>
 group_by(fiscal_year)|>
 summarise(yearly_amount = sum(amount, na.rm = TRUE)) |>
-arrange(desc(fiscal_year))
+arrange(desc(yearly_amount))
 ```
 
 Q3. You're interested in examining the vendors paid for capital projects at the University of Maryland. Search the payments data to find those payments, then write code to produce a list of each vendor and the total amount it received.
 
 Look carefully at that list - what cleaning will it require to ensure that you have only one row per vendor and zip code? Provide at least three examples of vendor names that are similar and should be combined into one. Describe in words how you might clean that data so that any nearly identical vendors would look identical - what would you change and how?
 
-A3.
-
+A3. Use a combination of string functions (str_detect, str_remove_all, str_squish, str_to_upper) to fix punctuation (commas, periods), extra spaces, and capitalization differences so that similar vendors like DEMOLITION SERVICES, INC = DEMOLITION SERVICES. Also, WHITING TURNER CONTRACTING CO, categorized under two different zipcodes and names (WHITING TURNER CONTRACTING COMPANY), we could use open refine to make the names the same. Using Open Refine to standardize similar names like PLANO-COUDON LLC/ PLANO-CONDON, LLC. Convert variations like CO, CORP, LLC, INC into a standardized form or remove them if they are not essential for identification.
 ```{r}
 umd_payments <- cleaned_payments |>
-filter(vendor_name == "UNIVERSITY OF MARYLAND")
+filter(agency_name == "CAPITAL PROJECTS- UNIVERSITY OF MARYLAND") |>
+group_by(vendor_name, vendor_zip) |>
+summarise(total_amount = sum(amount, na.rm = TRUE)) |>
+arrange(desc(total_amount))
 
 umd_payments
 ```

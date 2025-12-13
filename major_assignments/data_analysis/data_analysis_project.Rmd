@@ -69,7 +69,6 @@ courses_fall_spring <- courses_fall_spring |>
   select(-term_code, -term_suffix, -year)
 
 
-
 instructor_counts_fall_spring <- courses_fall_spring |>
 separate_rows(instructors, sep = ";") |>
 mutate(instructors = trimws(instructors)) |>

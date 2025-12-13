@@ -126,29 +126,3 @@ rename(url = value)
 
 combined_results<- bind_cols(results_h2, results_dates, results_url)
 ```
-
-
-
-
-
-
-Notes: 
-```{r}
-osp_results |> html_elements('li') |>
-  html_text() |>
-  as.tibble()
-
-separate(value, c("date", "title"), sep=":") #separate columns 
-
-mutate(title=case_when)
-```
-
-```{r}
-html_elements(xpath= "xpath") #use div to stop doubles, //div[contains(@class)]
-
-as.data.frame()
-
-headline != "" #removes columns with spaces
-
-setNames()
-```
