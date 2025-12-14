@@ -4,8 +4,10 @@ output: html_notebook
 ---
 
 ---
-title: "R Notebook"
-output: html_notebook
+title: "R Notebook Data Analysis "
+author: "Princess, Devin, Cecilia"
+date: "2025-12-01"
+output: html_document
 ---
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
@@ -21,6 +23,7 @@ library(tidyr)
 library(tidytext)
 ```
 
+## Load Data for Analysis
 
 ```{r}
 umd_courses <- read_csv("data/courses.csv")
@@ -55,10 +58,23 @@ courses_fall_spring <- courses_fall_spring |>
 
 ```
 
+## Milestone 02 !! Understanding the Dataset and Limits.
 
-Q1: Popular discourse often claims that humanities are declining while STEM fields dominate the future. To explore this at a micro level, calculate the total seat percentages for the English and Computer Science departments during fall semesters. Do you observe any patterns or notable differences? If so, provide an analysis explaining why these differences might exist.
+This UMD course data is similar to the one from the lab before. However the differences are shown in th amount of variables. There is only 7 columns in this UMD_COURSES. Section column and syllabus_count are absent from this data set, so this takes away some of the more statistical quantitative analysis that can be made. But the department, seats, descriptions, course title and professor name can provide enough of the questions.  
 
-The English department offered 52,394 seats total in the fall from 2018 to 2023. Fall 2023 had the lowest total seats (n= 7,678) and lowest percentage of total (14.65%), approximately 2.3 percentage points lower than most other years. This is a noticeable contraction or decreased of total seats. From 2018 through 2022, seat totals range from 8,700 to 9,200, percentages cluster tightly around ~17%, even Fall 2020, with the pandemic as an independent variable, stays within this band. This change suggests there was a consistent variable in the previous years that is now absent or much lower thus impacting the total number of seats in Fall 2023; It could be university policies, enrollment trends, economic pressures (job market) or instructor availability. 
+Also this specific data set only goes into the spring of 2023 and has missing semesters. Half of 2019 semesters are not provided which would make it hard to see trends. I would probably not work with the data before the gaps if I want to come up with sound conclusions. Also the data being a bit outdated limits some of the questions I provided, like the one about the "contemporary Trump Department of Education's" definition of professional. Although, this might prove some type of correlation between the reasoning stripping the professional label from certain majors and  the trend of those courses availability.On the other hand, I am not sure if that holds any relevance since this data is from nearly three years ago. 
+
+Any of the questions that have to do with numbers will be fine.  
+
+
+
+
+
+## Milestone 3 and Beyond-- :Analysis Questions and reflections 
+
+**Q1**: Popular discourse often claims that humanities are declining while STEM fields dominate the future. To explore this at a micro level, calculate the total seat percentages for the English and Computer Science departments during fall semesters. Do you observe any patterns or notable differences? If so, provide an analysis explaining why these differences might exist.
+
+**A1**: The English department offered 52,394 seats total in the fall from 2018 to 2023. Fall 2023 had the lowest total seats (n= 7,678) and lowest percentage of total (14.65%), approximately 2.3 percentage points lower than most other years. This is a noticeable contraction or decreased of total seats. From 2018 through 2022, seat totals range from 8,700 to 9,200, percentages cluster tightly around ~17%, even Fall 2020, with the pandemic as an independent variable, stays within this band. This change suggests there was a consistent variable in the previous years that is now absent or much lower thus impacting the total number of seats in Fall 2023; It could be university policies, enrollment trends, economic pressures (job market) or instructor availability. 
 
 
 ```{r}
@@ -204,9 +220,9 @@ ggplot(seats_by_year_journalism, aes(x = year, y = percent_of_total, group = 1))
 ```
 
 
-Q2: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
+**Q2**: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
 
-A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department had a wider ratio of more professors than total seats per observed semester. This is probably because a lot of english courses are seminars or independent studies 
+**A2**: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department had a wider ratio of more professors than total seats per observed semester. This is probably because a lot of english courses are seminars or independent studies 
 
 ```{r}
 prof_to_depart <- courses_fall_spring |>
@@ -224,9 +240,9 @@ summarise(
   arrange(desc(total_seats_depart))
 ```
 
-Q3: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
+**Q3**: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
 
-A3: We were curious to see what courses, in which semesters, had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, we see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
+**A3**: We were curious to see what courses, in which semesters, had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, we see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
 
 ```{r}
 keywords <- c("diversity", "equity", "race", "immigration", "trump", "gender")
@@ -240,9 +256,9 @@ chosen_words <- courses_fall_spring |>
 
 ```
 
-Q4: Is there a change in the mentions of Artificial intelligence in courses?
+**Q4**: Is there a change in the mentions of Artificial intelligence in courses?
 
-A4: Through this question we hoped to find out whether the recent uptick in AI usage throughout the world is reflected in the course offerings at UMD. While this data set is two years old there is still a significant increase in the number of courses with a focus on AI. The biggest increase was from the Fall 2022 semester to the Spring 2023 semester where the number of courses more than doubled. This is likely due to the release of ChatGPT in November of 2022. Even though the number of courses dropped again in Fall 2023, it shows how there was a continued interest in AI throughout UMD. 
+**A4**: Through this question we hoped to find out whether the recent uptick in AI usage throughout the world is reflected in the course offerings at UMD. While this data set is two years old there is still a significant increase in the number of courses with a focus on AI. The biggest increase was from the Fall 2022 semester to the Spring 2023 semester where the number of courses more than doubled. This is likely due to the release of ChatGPT in November of 2022. Even though the number of courses dropped again in Fall 2023, it shows how there was a continued interest in AI throughout UMD. 
 
 ```{r}
 artificial_intelligence <- courses_fall_spring |>
@@ -273,6 +289,109 @@ labs(title = "Mentions of Artificial Intelligence in Course Title and Descriptio
      plot.margin = margin(10, 10, 35, 10)
   )
   
+```
+
+**Q5** 
+What school has had the most classes removed as the semesters go by? (Or calculate the percent change from the department
+**A5**
+
+There was not one semester that had the same exact courses as another (which makes sense with the winter and summer classes.) While the Business department has the most courses provided with the data frame, it wasn't even on top 20 of the departments with the highest percent change. Departments like University Honors, Physics, and School of Music had an average percent change of courses provided over 1000 percent. While Global Communities, Executive MBA Program, Office of Undergraduate Research had negative average percent change of courses provided throughout semester. 
+
+```{r}
+department_ref <- umd_courses |>
+  separate_rows(department, sep = ";") |>
+  mutate(department = trimws(department)) |>
+  select(department) |>
+  distinct()
+
+department_ref
+
+#classes per semester 
+
+classes_per_department <- umd_courses |>
+  separate_rows(department, sep = ";") |>
+  mutate(department = trimws(department)) |>
+  group_by(department)|>
+  summarize(class_count = n())
+  
+classes_per_department 
+
+
+#-- SEMESTERS--# 
+
+#terms ref 
+termsem <- umd_courses |>
+  select(term) |>
+  distinct()|>
+  arrange(desc(term))
+
+termsem
+
+#There's 22 terms in this dataset. Should i create a  dataframe that filter each term and group by department to summarize the class count... 22 times OR find a loop code -->  I'll try to create a loop 
+   
+#trying out loops, trying to remember if the python rules apply
+   
+#Making a vector with the list of terms I had outputted in previous data set
+terms_vector <- unique(termsem$term)
+ 
+#Make an empty list 
+results_list_terms <- list()
+
+#Creating loop using the for every term in the term list vector, they will output results...
+ 
+for (term in terms_vector) {
+  results <- umd_courses |>
+    separate_rows(department, sep = ";") |>
+  mutate(department = trimws(department))|>
+  filter(term == !!term) |> # the !! forces the code to look at the values under term column as its own dataframe so that the filter can work -- only a tidyverse thing 
+  group_by(department)|>
+  summarize(class_count = n())
+  
+  results <- results |> mutate(term = term)
+results_list_terms[[as.character(term)]] <-results
+}
+
+final_term_list <- bind_rows(results_list_terms,.id = "term")
+
+
+#Widening the data set so it's easier to read. So that each term is in its own column instead of a part of a terms row. Essentially flipping the data frame  axis
+depart_class_termlist  <- final_term_list|>
+  pivot_wider(names_from = term, #specifying the unique term semesters are their own column name 
+              values_from = class_count, #class_count values will transfer to new columns; under each term
+              names_prefix = "term_") 
+
+#Joining the total classes dataframe into the previous one 
+depart_class_termlist_2 <- depart_class_termlist |>
+  left_join(classes_per_department, by = "department") |>
+    rename(
+      total_count = class_count 
+      #should i rename the term columns? lazy rn no shade. 
+    )
+
+
+#print tibble
+depart_class_termlist 
+  
+
+
+avg_percent_change <- depart_class_termlist |>
+  select(department, starts_with("term_")) |> 
+  pivot_longer(cols = starts_with("term_"),  #long format
+               names_to = "term", 
+               values_to = "class_count") |> 
+  group_by(department) |>  
+  arrange(term) |>  #  the terms are in order i guess
+  mutate(percent_change = (class_count - lag(class_count)) / lag(class_count) * 100) |>  # percent change
+  summarise(average_percent_change = mean(percent_change, na.rm = TRUE)) |> 
+  ungroup() 
+
+
+#arrange from high percent change to low
+avg_percent_change |>
+  arrange(desc(average_percent_change))
+
+
+
 ```
 
 
