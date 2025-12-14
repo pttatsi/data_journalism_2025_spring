@@ -106,7 +106,7 @@ seats_by_year_english <- fall_english_department |>
     .groups = "drop"
   )
 
-seats_by_year_english <- seats_by_year |>
+seats_by_year_english <- seats_by_year_english |>
   mutate(
     percent_of_total = total_seats / sum(total_seats) * 100
   )
