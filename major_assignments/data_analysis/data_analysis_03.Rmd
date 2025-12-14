@@ -220,9 +220,9 @@ ggplot(seats_by_year_journalism, aes(x = year, y = percent_of_total, group = 1))
 ```
 
 
-**Q2**: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
+Q2: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
 
-**A2**: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department had a wider ratio of more professors than total seats per observed semester. This is probably because a lot of english courses are seminars or independent studies 
+A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department had a wider ratio of more professors than total seats per observed semester. This is probably because a lot of english courses are seminars or independent studies 
 
 ```{r}
 prof_to_depart <- courses_fall_spring |>
@@ -240,9 +240,9 @@ summarise(
   arrange(desc(total_seats_depart))
 ```
 
-**Q3**: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
+Q3: [wildcard] Search the description column for keywords of interest and discuss findings (if a pattern is found, if not keep searching relevant words) 
 
-**A3**: We were curious to see what courses, in which semesters, had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, we see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
+A3: We were curious to see what courses, in which semesters, had the word Trump in their description. We found 10, all of them relevant to the president. Out of the 10 courses mentioning Trump in the data (checked with the out of session semesters), six are journalism courses. The classes started in the spring of 2021, some weeks after the Jan. 6 insurrection at the U.S. capitol. Trump's presidencies has opened doors that severely fractured news production and consumption. So its important to teach future journalists the best tools to navigate the fierce battle to control the flow of information. So, we see these courses, the moment they began and their focus on Trump as a reflection of Philip Merrill's focus on teaching its students real-world journalism.
 
 ```{r}
 keywords <- c("diversity", "equity", "race", "immigration", "trump", "gender")
@@ -255,7 +255,6 @@ chosen_words <- courses_fall_spring |>
   arrange(desc(count))
 
 ```
-
 **Q4**: Is there a change in the mentions of Artificial intelligence in courses?
 
 **A4**: Through this question we hoped to find out whether the recent uptick in AI usage throughout the world is reflected in the course offerings at UMD. While this data set is two years old there is still a significant increase in the number of courses with a focus on AI. The biggest increase was from the Fall 2022 semester to the Spring 2023 semester where the number of courses more than doubled. This is likely due to the release of ChatGPT in November of 2022. Even though the number of courses dropped again in Fall 2023, it shows how there was a continued interest in AI throughout UMD. 
