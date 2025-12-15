@@ -291,5 +291,112 @@ labs(title = "Mentions of Artificial Intelligence in Course Title and Descriptio
     axis.text.x = element_text(angle = 25,  hjust=1),
      plot.margin = margin(10, 10, 35, 10)
   )
-  
 ```
+
+**Q5** 
+What school has had the most classes removed as the semesters go by? (Or calculate the percent change from the department
+**A5**
+
+There was not one semester that had the same exact courses as another (which makes sense with the winter and summer classes.) While the Business department has the most courses provided with the data frame, it wasn't even on top 20 of the departments with the highest percent change. Departments like University Honors, Physics, and School of Music had an average percent change of courses provided over 1000 percent. While Global Communities, Executive MBA Program, Office of Undergraduate Research had negative average percent change of courses provided throughout semester. 
+
+```{r}
+department_ref <- umd_courses |>
+  separate_rows(department, sep = ";") |>
+  mutate(department = trimws(department)) |>
+  select(department) |>
+  distinct()
+
+department_ref
+
+#classes per semester 
+
+classes_per_department <- umd_courses |>
+  separate_rows(department, sep = ";") |>
+  mutate(department = trimws(department)) |>
+  group_by(department)|>
+  summarize(class_count = n())
+  
+classes_per_department 
+
+
+#-- SEMESTERS--# 
+
+#terms ref 
+termsem <- umd_courses |>
+  select(term) |>
+  distinct()|>
+  arrange(desc(term))
+
+termsem
+
+#There's 22 terms in this dataset. Should i create a  dataframe that filter each term and group by department to summarize the class count... 22 times OR find a loop code -->  I'll try to create a loop 
+   
+#trying out loops, trying to remember if the python rules apply
+   
+#Making a vector with the list of terms I had outputted in previous data set
+terms_vector <- unique(termsem$term)
+ 
+#Make an empty list 
+results_list_terms <- list()
+
+#Creating loop using the for every term in the term list vector, they will output results...
+ 
+for (term in terms_vector) {
+  results <- umd_courses |>
+    separate_rows(department, sep = ";") |>
+  mutate(department = trimws(department))|>
+  filter(term == !!term) |> # the !! forces the code to look at the values under term column as its own dataframe so that the filter can work -- only a tidyverse thing 
+  group_by(department)|>
+  summarize(class_count = n())
+  
+  results <- results |> mutate(term = term)
+results_list_terms[[as.character(term)]] <-results
+}
+
+final_term_list <- bind_rows(results_list_terms,.id = "term")
+
+
+#Widening the data set so it's easier to read. So that each term is in its own column instead of a part of a terms row. Essentially flipping the data frame  axis
+depart_class_termlist  <- final_term_list|>
+  pivot_wider(names_from = term, #specifying the unique term semesters are their own column name 
+              values_from = class_count, #class_count values will transfer to new columns; under each term
+              names_prefix = "term_") 
+
+#Joining the total classes dataframe into the previous one 
+depart_class_termlist_2 <- depart_class_termlist |>
+  left_join(classes_per_department, by = "department") |>
+    rename(
+      total_count = class_count 
+      #should i rename the term columns? lazy rn no shade. 
+    )
+
+
+#print tibble
+depart_class_termlist 
+  
+
+
+avg_percent_change <- depart_class_termlist |>
+  select(department, starts_with("term_")) |> 
+  pivot_longer(cols = starts_with("term_"),  #long format
+               names_to = "term", 
+               values_to = "class_count") |> 
+  group_by(department) |>  
+  arrange(term) |>  #  the terms are in order i guess
+  mutate(percent_change = (class_count - lag(class_count)) / lag(class_count) * 100) |>  # percent change
+  summarise(average_percent_change = mean(percent_change, na.rm = TRUE)) |> 
+  ungroup() 
+
+
+#arrange from high percent change to low
+avg_percent_change |>
+  arrange(desc(average_percent_change))
+
+
+
+```
+
+
+
+
+
