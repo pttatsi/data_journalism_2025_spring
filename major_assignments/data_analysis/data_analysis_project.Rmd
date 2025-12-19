@@ -50,27 +50,7 @@ courses_fall_spring <- courses_fall_spring |>
     )) |>
   select(-term_code, -term_suffix, -year)
 
-
-instructor_counts_fall_spring <- courses_fall_spring |>
-separate_rows(instructors, sep = ";") |>
-mutate(instructors = trimws(instructors)) |>
-group_by(instructors, term) |>
-summarise(n_courses = n(), 
-          n_seats   = sum(seats, na.rm = TRUE),
-    .groups = "drop"
-  )
-
-
-instructor_total_major_semesters <- courses_fall_spring |>
-  separate_rows(instructors, sep = ";\\s*") |>
-  mutate(instructors = trimws(instructors)) |>
-  group_by(instructors) |>
-  summarise(n_courses = n(), 
-             n_seats   = sum(seats, na.rm = TRUE),
-            .groups = "drop") |>
-   arrange(desc(n_seats)) 
-
-instructor_total_major_semesters
+view(courses_fall_spring)
 
 ```
 
@@ -92,8 +72,14 @@ filter(department == "Computer Science",
         month(start_date) == 8) |>
   mutate(year = year(start_date))
 
+
 fall_journalism_department <- courses_fall_spring |>
 filter(department == "Journalism", 
+        month(start_date) == 8) |>
+  mutate(year = year(start_date))
+
+fall_elec_and_comp_engineering_department <- courses_fall_spring |>
+filter(department == "Electrical & Computer Engineering", 
         month(start_date) == 8) |>
   mutate(year = year(start_date))
 
@@ -109,15 +95,27 @@ fall_CS_department <- fall_CS_department |>
   select(-id) |>
   rename(id= base_course)
 
+
 fall_journalism_department <- fall_journalism_department |>
    mutate(base_course = str_extract(id, "^[A-Z]+\\d+"))|>
   select(-id) |>
   rename(id= base_course)
+
+fall_elec_and_comp_engineering_department <- fall_elec_and_comp_engineering_department |> 
+   mutate(base_course = str_extract(id, "^[A-Z]+\\d+"))|>
+  select(-id) |>
+  rename(id= base_course)
+
+view(fall_english_department)
+view(fall_journalism_department)
+view(fall_journalism_department)
+view(fall_elec_and_comp_engineering_department)
 ```
 
 
 Creating data frames with total percentages seat for each department we're interested in observing
 ```{r}
+#English 
 seats_by_year_english <- fall_english_department |>
   group_by(year) |>
   summarise(
@@ -130,6 +128,7 @@ seats_by_year_english <- seats_by_year_english |>
     percent_of_total = total_seats / sum(total_seats) * 100
   )
 
+#Computer Science 
 seats_by_year_CS <- fall_CS_department |>
   group_by(year) |>
   summarise(
@@ -142,6 +141,7 @@ seats_by_year_CS <- seats_by_year_CS |>
     percent_of_total = total_seats / sum(total_seats) * 100
   )
 
+#Journalism
 seats_by_year_journalism <- fall_journalism_department |>
   group_by(year) |>
   summarise(
@@ -153,6 +153,24 @@ seats_by_year_journalism <- seats_by_year_journalism |>
   mutate(
     percent_of_total = total_seats / sum(total_seats) * 100
   )
+
+#Business and Management 
+seats_by_year_elec_and_comp_engineering<- fall_elec_and_comp_engineering_department |>
+  group_by(year) |>
+  summarise(
+    total_seats = sum(seats, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+seats_by_year_elec_and_comp_engineering <- seats_by_year_elec_and_comp_engineering |>
+  mutate(
+    percent_of_total = total_seats / sum(total_seats) * 100
+  )
+
+view(seats_by_year_english)
+view(seats_by_year_CS)
+view(seats_by_year_journalism)
+view(seats_by_year_elec_and_comp_engineering)
 ```
 
 ** English Department offered 52,392 over the fall semesters from 2018 to 2023
@@ -166,7 +184,7 @@ seats_by_year_english |>
 seats_by_year_CS |>
   summarise(sum(total_seats))
 ```
-**  
+
 
 ```{r}
 ggplot(seats_by_year_english, aes(x = year, y = percent_of_total, group = 1)) +
@@ -278,6 +296,7 @@ labs(title = "Mentions of Trump in Course Description", x= "Semester", y = "Numb
 
 
 Q4: Is there a change in the mentions of Artificial intelligence in courses?
+
 A4: Through this question we hoped to find out whether the recent uptick in AI usage throughout the world is reflected in the course offerings at UMD. While this data set is two years old there is still a significant increase in the number of courses with a focus on AI. The biggest increase was from the Fall 2022 semester to the Spring 2023 semester where the number of courses more than doubled. This is likely due to the release of ChatGPT in November of 2022. Even though the number of courses dropped again in Fall 2023, it shows how there was a continued interest in AI throughout UMD. 
 
 ```{r}
@@ -313,8 +332,8 @@ labs(title = "Mentions of Artificial Intelligence in Course Title and Descriptio
 ```
 **Q5** 
 What school has had the most classes removed as the semesters go by? (Or calculate the percent change from the department
-**A5**
 
+**A5**
 There was not one semester that had the same exact courses as another (which makes sense with the winter and summer classes.) While the Business department has the most courses provided with the data frame, it wasn't even on top 20 of the departments with the highest percent change. Departments like University Honors, Physics, and School of Music had an average percent change of courses provided over 1000 percent. While Global Communities, Executive MBA Program, Office of Undergraduate Research had negative average percent change of courses provided throughout semester. 
 
 ```{r}
