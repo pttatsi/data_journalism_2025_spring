@@ -267,8 +267,7 @@ summarise(
   semester_total = n(),
   .groups = "drop"
 ) |>
-arrange(desc(start_date))
-
+arrange(desc(semester_total))
 
 trump_courses |>
   ggplot() + 
@@ -285,7 +284,7 @@ labs(title = "Mentions of Trump in Course Description", x= "Semester", y = "Numb
     axis.text.x = element_text(angle = 25,  hjust=1),
      plot.margin = margin(10, 10, 35, 10)
   )
-
+ view(trump_courses)
 ```
 
 
