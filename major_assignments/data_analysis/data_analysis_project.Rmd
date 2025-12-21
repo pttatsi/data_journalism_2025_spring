@@ -1,6 +1,8 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "R Notebook Data Analysis "
+author: "Princess, Devin, Cecilia"
+date: "2025-12-01"
+output: html_document
 ---
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
@@ -18,6 +20,17 @@ library(lubridate)
 library(ggthemes)
 ```
 
+## Milestone 02 !! Understanding the Dataset and Limits.
+
+This UMD course data is similar to the one from the lab before. However the differences are shown in th amount of variables. There is only 7 columns in this UMD_COURSES. Section column and syllabus_count are absent from this data set, so this takes away some of the more statistical quantitative analysis that can be made. But the department, seats, descriptions, course title and professor name can provide enough of the questions.  
+
+Also this specific data set only goes into the spring of 2023 and has missing semesters. Half of 2019 semesters are not provided which would make it hard to see trends. I would probably not work with the data before the gaps if I want to come up with sound conclusions. Also the data being a bit outdated limits some of the questions I provided, like the one about the "contemporary Trump Department of Education's" definition of professional. Although, this might prove some type of correlation between the reasoning stripping the professional label from certain majors and  the trend of those courses availability.On the other hand, I am not sure if that holds any relevance since this data is from nearly three years ago. 
+
+Any of the questions that have to do with numbers will be fine.  
+
+
+
+## Milestone 3 and Beyond-- :Analysis Questions and reflections 
 
 ```{r}
 umd_courses <- read_csv("data/courses.csv")
@@ -78,10 +91,6 @@ filter(department == "Journalism",
         month(start_date) == 8) |>
   mutate(year = year(start_date))
 
-fall_elec_and_comp_engineering_department <- courses_fall_spring |>
-filter(department == "Electrical & Computer Engineering", 
-        month(start_date) == 8) |>
-  mutate(year = year(start_date))
 
 # Some courses are exactly the same but have special lettering for honors students so this standardizes the id column so we get clean percentages 
 
@@ -101,15 +110,12 @@ fall_journalism_department <- fall_journalism_department |>
   select(-id) |>
   rename(id= base_course)
 
-fall_elec_and_comp_engineering_department <- fall_elec_and_comp_engineering_department |> 
-   mutate(base_course = str_extract(id, "^[A-Z]+\\d+"))|>
-  select(-id) |>
-  rename(id= base_course)
+
 
 view(fall_english_department)
 view(fall_journalism_department)
 view(fall_journalism_department)
-view(fall_elec_and_comp_engineering_department)
+
 ```
 
 
@@ -154,23 +160,11 @@ seats_by_year_journalism <- seats_by_year_journalism |>
     percent_of_total = total_seats / sum(total_seats) * 100
   )
 
-#Business and Management 
-seats_by_year_elec_and_comp_engineering<- fall_elec_and_comp_engineering_department |>
-  group_by(year) |>
-  summarise(
-    total_seats = sum(seats, na.rm = TRUE),
-    .groups = "drop"
-  )
-
-seats_by_year_elec_and_comp_engineering <- seats_by_year_elec_and_comp_engineering |>
-  mutate(
-    percent_of_total = total_seats / sum(total_seats) * 100
-  )
 
 view(seats_by_year_english)
 view(seats_by_year_CS)
 view(seats_by_year_journalism)
-view(seats_by_year_elec_and_comp_engineering)
+
 ```
 
 ** English Department offered 52,392 over the fall semesters from 2018 to 2023
@@ -242,7 +236,7 @@ ggplot(seats_by_year_journalism, aes(x = year, y = percent_of_total, group = 1))
 
 Q2: Which departments had the least amount of professors across the years? which ones had the most? Are there any patterns in the results? 
 
-A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department wider ratio of more professors than total seats per observed semester. This is probably because a lot of english courses are seminars or independent studies 
+A2: The departments Business and Management and English had the most amount of professors for the spring and fall semesters between 2018 to 2023. Though Business and Management also had the highest number of seats across the observed semesters, the English department wider ratio of more professors than total seats per observed semester. This is probably because a lot of English courses are seminars or independent studies 
 
 ```{r}
 prof_to_depart <- courses_fall_spring |>
@@ -432,4 +426,20 @@ avg_percent_change |>
 
 
 ```
+** Final Story Memo
+
+We’ve heard time and time again. The humanities are dying and the sciences are thriving. But, how has this change in societal values actually changed the classes offered by the University of Maryland in the past 8 years? Through our analysis we’ve seen how there are small but constant decreases in English classes offered and an increase in classes around AI. Our story would focus on how students, faculty and staff of the University of Maryland feel about these changes. 
+
+Our results show that the Fall 2023 semester had the lowest number of seats open in the English department.  The number of classes offered had been fairly steady until the numbers drastically plummeted in 2023. In contrast, the computer science department steadily increased the number of classes it offered from 2018 and saw a slight decrease in the fall 2023 semester. We also found that the computer science department offered about 8,000 more seats than the English department over the fall semesters we have data for. 
+	
+This dataset does not offer up very exciting conclusions by itself. But when we put in comparison with wider social trends of the past five years, we begin to see how changing attitudes towards the humanities might be affecting what colleges teach. For example, we found that classes with a focus on Artificial Intelligence increased in the fall semesters between 2018 to 2023, where the numbers more than doubled in the spring semester. Again, in contrast, the number of classes offered by the English department plummets in 2023. To further our analysis, we decided to compare classes offered by English and Computer Science departments to Journalism because we consider the major to exemplify a major that intersects with the humanities and stem. 
+We found the Journalism department offered less seats than it usually does more than the English and Computer Science departments in 2023. Overall, it shows how a stronger focus on STEM related classes could be negatively impacting the amount of classes offered by humanities departments. The reason data analysis works so well for this story is the very basis of the story is about the contrast between STEM and humanities. We’re using coding and graphs to look at changing values. 
+Data is oftentimes tied to numbers but it allows us to quantify values such as wording and then comparing that to different societal trends. Since this dataset has such detailed wording it really allows us to identify the topics of the classes. For example, in question two, we found that UMD departments such as Journalism and Government and Politics offered courses to teach students how to navigate Trump’s America after the Jan. 6th uprising in the U.S. Capitol. We filtered the description column for Trump’s name. 
+
+Unfortunately, this data does not go up till 2025 so the full extent of how the AI boom has affected UMD can not be shown. This also means that any effects of the Trump administration on college campuses such as change in DEI wording in course description will not be shown. But, it can be used to show how the decline of the humanities has been happening for several years. Not just due to the current President’s actions but due to what society chose as more valuable. 
+We’d need to also pull numbers from other datasets to get a more well rounded picture. Enrollment numbers by department from 2017 to 2023 would also help see how student’s preferences affect the number of classes offered. As well as considering whether there is a financial element to these changes. Since we found that English classes tend to be smaller it may be more expensive to maintain these departments over the large lecture halls of something like business management. Another way to confirm whether these are an actual trend is finding the course offerings from another university similar to UMD to see if their course offerings are following a similar trend. We want this story to hone in on something as simple as saying the number of seats offered by a department can actually be a symptom of a wider societal change. But it would also be interesting to compare this data to another consisting of the courses cancelled per semester and department. 
+
+To get a well rounded story we have four different types of sources we would want to speak to. First is obviously college professors. Our focus would be on finding people who have been with the University of Maryland for a long time, minimum 15 years. This way we can get a perspective of someone who has seen college campuses change. One professor would be from the humanities side, specifically English and another would focus on computer science and AI. Then we would want to speak with students to get their reactions to our analysis. We’d ask questions like “in your perspective, are college campuses devaluing the humanities? If so, where is that value being placed? If not, what is your response to those who say there’s a tangible devaluation of the humanities? What does that mean or look like to you?” 
+
+Another side to look at is career counselors at high schools and colleges to investigate whether there’s a change in the types of jobs and degrees students lean towards. Finally, we’d want to interview an administrator who may be able to tell us why UMD is leaning more towards STEM courses.
 
