@@ -323,14 +323,15 @@ labs(title = "Mentions of Artificial Intelligence in Course Title and Descriptio
   )
   
 ```
-**Q5** 
-What school has had the most classes removed as the semesters go by? (Or calculate the percent change from the department
 
+**Q5** 
+What school has had the most classes removed as the semesters go by? 
 **A5**
-There was not one semester that had the same exact courses as another (which makes sense with the winter and summer classes.) While the Business department has the most courses provided with the data frame, it wasn't even on top 20 of the departments with the highest percent change. Departments like University Honors, Physics, and School of Music had an average percent change of courses provided over 1000 percent. While Global Communities, Executive MBA Program, Office of Undergraduate Research had negative average percent change of courses provided throughout semester. 
+
+When looking at the average change of the class count for each department, it seems like classes within the Communication department had the most classes removed as the semester goes by, with an average change rate of -8.4. Also notable departments that sre on the top five of negative course changes is English department and Woman Studies, with an average change rate of -2.5. The other classes on the top five of that list are Honors and Curriculum Instructions but those are departments that have many of their classes go into different departments. 
 
 ```{r}
-department_ref <- umd_courses |>
+department_ref <- courses_fall_spring  |>
   separate_rows(department, sep = ";") |>
   mutate(department = trimws(department)) |>
   select(department) |>
@@ -340,7 +341,7 @@ department_ref
 
 #classes per semester 
 
-classes_per_department <- umd_courses |>
+classes_per_department <- courses_fall_spring|>
   separate_rows(department, sep = ";") |>
   mutate(department = trimws(department)) |>
   group_by(department)|>
@@ -352,19 +353,28 @@ classes_per_department
 #-- SEMESTERS--# 
 
 #terms ref 
-termsem <- umd_courses |>
+termspsf <- courses_fall_spring |>
   select(term) |>
   distinct()|>
   arrange(desc(term))
 
-termsem
+termspsf
 
-#There's 22 terms in this dataset. Should i create a  dataframe that filter each term and group by department to summarize the class count... 22 times OR find a loop code -->  I'll try to create a loop 
+
+terms
+
+```
+
+
+
+
+```{r}
+#There's 11 columns that represent each termm in this dataframe ... and 210 departments in the department column.  i created a loop  that filter each term and group by department to summarize the class count... 
    
-#trying out loops, trying to remember if the python rules apply
+
    
 #Making a vector with the list of terms I had outputted in previous data set
-terms_vector <- unique(termsem$term)
+terms_vector <- unique(termspsf$term)
  
 #Make an empty list 
 results_list_terms <- list()
@@ -386,46 +396,57 @@ results_list_terms[[as.character(term)]] <-results
 final_term_list <- bind_rows(results_list_terms,.id = "term")
 
 
+
 #Widening the data set so it's easier to read. So that each term is in its own column instead of a part of a terms row. Essentially flipping the data frame  axis
 depart_class_termlist  <- final_term_list|>
   pivot_wider(names_from = term, #specifying the unique term semesters are their own column name 
               values_from = class_count, #class_count values will transfer to new columns; under each term
               names_prefix = "term_") 
 
-#Joining the total classes dataframe into the previous one 
-depart_class_termlist_2 <- depart_class_termlist |>
-  left_join(classes_per_department, by = "department") |>
-    rename(
-      total_count = class_count 
-      #should i rename the term columns? lazy rn no shade. 
-    )
+depart_class_termlist
+
+#mutate the n/a values as 0 for calculation. 
+depart_class_termlist <- depart_class_termlist |>
+   mutate(across(where(is.numeric), ~replace_na(.x, 0)))
 
 
-#print tibble
-depart_class_termlist 
+#calculate difference from the first fall semester term to the last.
+depart_class_last <- depart_class_termlist  |>
+  mutate(
+     c18to23diff = term_202308 - term_201808
+  )
   
+#show the difference 
+depart_class_termlist3 |> 
+  select(c18to23diff)
 
 
-avg_percent_change <- depart_class_termlist |>
-  select(department, starts_with("term_")) |> 
-  pivot_longer(cols = starts_with("term_"),  #long format
+#
+#calculate average change for each department over the span of semesters
+
+long_dctlist <- depart_class_termlist |>
+  pivot_longer(cols = starts_with("term_"), 
                names_to = "term", 
-               values_to = "class_count") |> 
-  group_by(department) |>  
-  arrange(term) |>  #  the terms are in order i guess
-  mutate(percent_change = (class_count - lag(class_count)) / lag(class_count) * 100) |>  # percent change
-  summarise(average_percent_change = mean(percent_change, na.rm = TRUE)) |> 
-  ungroup() 
+               values_to = "value")
 
+# calculate changes
+change_coursedep <- long_dctlist |>
+  arrange(department, term) |>
+  group_by(department) |>
+  mutate(change = value - lag(value))|>
+  filter(!is.na(change))
 
-#arrange from high percent change to low
-avg_percent_change |>
-  arrange(desc(average_percent_change))
+# calculate average change
+average_change <- change_coursedep |>
+  summarise(average_change = mean(change, na.rm = TRUE))|>
+  arrange(desc(average_change))
 
+#show average change in courses
+average_change
 
 
 ```
-** Final Story Memo
+## Final Story Memo
 
 We’ve heard time and time again. The humanities are dying and the sciences are thriving. But, how has this change in societal values actually changed the classes offered by the University of Maryland in the past 8 years? Through our analysis we’ve seen how there are small but constant decreases in English classes offered and an increase in classes around AI. Our story would focus on how students, faculty and staff of the University of Maryland feel about these changes. 
 
