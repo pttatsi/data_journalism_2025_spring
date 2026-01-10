@@ -33,7 +33,9 @@ Any of the questions that have to do with numbers will be fine.
 ## Milestone 3 and Beyond-- :Analysis Questions and reflections 
 
 ```{r}
-umd_courses <- read_csv("data/courses.csv")
+umd_courses <- read_csv("data/courses.csv") #data download 
+
+#cleaning code possibly 
 ```
 Set-Up: Creating Courses Fall-Spring semesters only 
 
